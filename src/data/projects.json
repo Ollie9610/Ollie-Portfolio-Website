@@ -1,0 +1,161 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "title": "Sales Performance Dashboard",
+      "description": "Interactive dashboard analyzing quarterly sales performance with predictive analytics",
+      "image": "/api/placeholder/400/300",
+      "technologies": ["Power BI", "SQL", "Python", "Azure"],
+      "category": "dashboard",
+      "metrics": {
+        "views": 1250,
+        "impact": "15% increase in sales",
+        "duration": "3 months"
+      },
+      "details": {
+        "challenge": "Company needed better visibility into sales performance and forecasting",
+        "solution": "Created comprehensive dashboard with real-time data integration and predictive models",
+        "results": "15% increase in sales, 30% reduction in reporting time, improved forecasting accuracy by 25%",
+        "technologies": ["Power BI", "SQL Server", "Python", "Azure Data Factory", "Machine Learning"],
+        "features": [
+          "Real-time data visualization",
+          "Predictive analytics models",
+          "Automated report generation",
+          "Mobile-responsive design",
+          "Role-based access control"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "title": "Customer Churn Analysis",
+      "description": "Machine learning model to predict and prevent customer churn",
+      "image": "/api/placeholder/400/300",
+      "technologies": ["Python", "Scikit-learn", "Pandas", "Tableau"],
+      "category": "project",
+      "metrics": {
+        "views": 890,
+        "impact": "22% reduction in churn",
+        "duration": "2 months"
+      },
+      "details": {
+        "challenge": "High customer churn rate affecting business growth",
+        "solution": "Developed ML model to identify at-risk customers and implemented targeted retention strategies",
+        "results": "22% reduction in customer churn, $2M in retained revenue, improved customer satisfaction scores",
+        "technologies": ["Python", "Scikit-learn", "Pandas", "NumPy", "Tableau", "PostgreSQL"],
+        "features": [
+          "Churn prediction model (85% accuracy)",
+          "Customer segmentation analysis",
+          "Automated alert system",
+          "Retention campaign recommendations",
+          "Performance monitoring dashboard"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "title": "Supply Chain Optimization",
+      "description": "Data-driven approach to optimize inventory and reduce costs",
+      "image": "/api/placeholder/400/300",
+      "technologies": ["R", "Shiny", "SQL", "Excel"],
+      "category": "project",
+      "metrics": {
+        "views": 1100,
+        "impact": "18% cost reduction",
+        "duration": "4 months"
+      },
+      "details": {
+        "challenge": "Inefficient inventory management leading to high costs and stockouts",
+        "solution": "Analyzed supply chain data to optimize inventory levels and improve demand forecasting",
+        "results": "18% reduction in inventory costs, 40% reduction in stockouts, improved supplier relationships",
+        "technologies": ["R", "Shiny", "SQL", "Excel", "VBA", "SAP"],
+        "features": [
+          "Demand forecasting models",
+          "Inventory optimization algorithms",
+          "Supplier performance tracking",
+          "Cost analysis tools",
+          "Automated reporting system"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "title": "Executive KPI Dashboard",
+      "description": "Real-time executive dashboard for monitoring key business metrics and performance indicators",
+      "image": "/api/placeholder/400/300",
+      "technologies": ["Tableau", "SQL", "Python", "AWS"],
+      "category": "dashboard",
+      "metrics": {
+        "views": 2100,
+        "impact": "40% faster decision making",
+        "duration": "2 months"
+      },
+      "details": {
+        "challenge": "Executives needed real-time visibility into business performance across all departments",
+        "solution": "Built comprehensive KPI dashboard with automated data refresh and mobile accessibility",
+        "results": "40% faster decision making, 60% reduction in manual reporting, improved data accuracy to 99.5%",
+        "technologies": ["Tableau", "SQL Server", "Python", "AWS", "REST APIs", "PowerShell"],
+        "features": [
+          "Real-time KPI monitoring",
+          "Interactive drill-down capabilities",
+          "Mobile-responsive design",
+          "Automated data refresh",
+          "Custom alert system"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "title": "Marketing Analytics Model",
+      "description": "Advanced analytics model to optimize marketing spend and ROI across multiple channels",
+      "image": "/api/placeholder/400/300",
+      "technologies": ["Python", "Scikit-learn", "Pandas", "Google Analytics"],
+      "category": "project",
+      "metrics": {
+        "views": 1500,
+        "impact": "35% improvement in marketing ROI",
+        "duration": "3 months"
+      },
+      "details": {
+        "challenge": "Marketing team needed better insights into channel performance and budget allocation",
+        "solution": "Developed comprehensive analytics model with attribution analysis and budget optimization",
+        "results": "35% improvement in marketing ROI, 25% reduction in wasted ad spend, 50% better budget allocation",
+        "technologies": ["Python", "Scikit-learn", "Pandas", "Google Analytics", "Facebook API", "Google Ads API"],
+        "features": [
+          "Multi-channel attribution analysis",
+          "Budget optimization algorithms",
+          "ROI prediction models",
+          "Automated reporting",
+          "A/B testing framework"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "title": "Financial Risk Dashboard",
+      "description": "Comprehensive risk monitoring dashboard for financial institutions with real-time alerts",
+      "image": "/api/placeholder/400/300",
+      "technologies": ["Power BI", "SQL", "R", "Azure"],
+      "category": "dashboard",
+      "metrics": {
+        "views": 1800,
+        "impact": "50% reduction in risk exposure",
+        "duration": "4 months"
+      },
+      "details": {
+        "challenge": "Financial institution needed real-time risk monitoring and early warning systems",
+        "solution": "Built comprehensive risk dashboard with machine learning models for early detection",
+        "results": "50% reduction in risk exposure, 80% faster risk detection, 99.9% uptime",
+        "technologies": ["Power BI", "SQL Server", "R", "Azure ML", "Python", "REST APIs"],
+        "features": [
+          "Real-time risk monitoring",
+          "Machine learning alerts",
+          "Regulatory compliance tracking",
+          "Custom risk scoring",
+          "Automated reporting"
+        ]
+      }
+    }
+  ]
+}
+

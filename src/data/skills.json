@@ -1,0 +1,90 @@
+{
+  "skills": [
+    {
+      "name": "Python",
+      "level": 95,
+      "category": "Programming & Query Languages"
+    },
+    {
+      "name": "R",
+      "level": 88,
+      "category": "Programming & Query Languages"
+    },
+    {
+      "name": "SQL",
+      "level": 92,
+      "category": "Programming & Query Languages"
+    },
+    {
+      "name": "JavaScript",
+      "level": 85,
+      "category": "Programming & Query Languages"
+    },
+    {
+      "name": "Power BI",
+      "level": 90,
+      "category": "Analytics & Data Platforms"
+    },
+    {
+      "name": "Tableau",
+      "level": 88,
+      "category": "Analytics & Data Platforms"
+    },
+    {
+      "name": "AWS",
+      "level": 82,
+      "category": "Analytics & Data Platforms"
+    },
+    {
+      "name": "Azure",
+      "level": 78,
+      "category": "Analytics & Data Platforms"
+    },
+    {
+      "name": "PostgreSQL",
+      "level": 90,
+      "category": "Application Development & Automation"
+    },
+    {
+      "name": "MySQL",
+      "level": 85,
+      "category": "Application Development & Automation"
+    },
+    {
+      "name": "MongoDB",
+      "level": 80,
+      "category": "Application Development & Automation"
+    },
+    {
+      "name": "Machine Learning",
+      "level": 85,
+      "category": "Application Development & Automation"
+    },
+    {
+      "name": "Statistical Analysis",
+      "level": 90,
+      "category": "Analytics & Data Platforms"
+    },
+    {
+      "name": "Data Visualization",
+      "level": 92,
+      "category": "Analytics & Data Platforms"
+    },
+    {
+      "name": "Project Management",
+      "level": 80,
+      "category": "Business Systems"
+    },
+    {
+      "name": "Communication",
+      "level": 88,
+      "category": "Business Systems"
+    },
+    {
+      "name": "Problem Solving",
+      "level": 95,
+      "category": "Business Systems"
+    }
+  ]
+}
+
