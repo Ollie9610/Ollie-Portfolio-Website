@@ -126,13 +126,6 @@ const ActionButton = styled(motion.button)<{ variant?: 'edit' | 'delete' | 'add'
   }}
 `;
 
-const FormContainer = styled(motion.div)`
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-`;
 
 const Form = styled.form`
   display: grid;
@@ -476,7 +469,6 @@ const SkillsEditor: React.FC = () => {
     category: 'Programming & Query Languages'
   });
   const [proficiencyDots, setProficiencyDots] = useState(2);
-  const [selectedCategory, setSelectedCategory] = useState<Skill['category'] | ''>('');
 
   // Helper functions to convert between dots and percentage
   const dotsToPercentage = (dots: number) => {
@@ -503,7 +495,6 @@ const SkillsEditor: React.FC = () => {
         category: 'Programming & Query Languages'
       });
       setProficiencyDots(2);
-      setSelectedCategory('');
     }
   }, [isAdding, editingSkill]);
 
@@ -535,7 +526,6 @@ const SkillsEditor: React.FC = () => {
     setProficiencyDots(2);
     setIsAdding(false);
     setEditingSkill(null);
-    setSelectedCategory('');
   };
 
   const handleAddSkill = (category: Skill['category']) => {
@@ -546,7 +536,6 @@ const SkillsEditor: React.FC = () => {
       handleClose();
       // Use setTimeout to ensure state is reset before opening new form
       setTimeout(() => {
-        setSelectedCategory(category);
         setFormData({
           name: '',
           level: 50,
@@ -557,7 +546,6 @@ const SkillsEditor: React.FC = () => {
         setEditingSkill(null);
       }, 100);
     } else {
-      setSelectedCategory(category);
       setFormData({
         name: '',
         level: 50,

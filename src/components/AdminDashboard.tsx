@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FaEdit, FaSignOutAlt, FaChartBar, FaBriefcase, FaCogs, FaEye, FaUser } from 'react-icons/fa';
+import { FaEdit, FaSignOutAlt, FaChartBar, FaBriefcase, FaCogs, FaEye, FaUser, FaDownload, FaUpload, FaUndo } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import ProjectEditor from './ProjectEditor';
@@ -169,16 +169,96 @@ const PreviewButton = styled(motion.button)`
   }
 `;
 
+const DataManagementButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+`;
+
+const DataButton = styled(motion.button)<{ variant: 'export' | 'import' | 'reset' }>`
+  background: ${props => {
+    switch (props.variant) {
+      case 'export': return 'linear-gradient(45deg, #4CAF50, #66BB6A)';
+      case 'import': return 'linear-gradient(45deg, #2196F3, #42A5F5)';
+      case 'reset': return 'linear-gradient(45deg, #f44336, #ef5350)';
+      default: return 'linear-gradient(45deg, #ffd700, #ffed4e)';
+    }
+  }};
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+const DataManagementTitle = styled.h3`
+  color: white;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+`;
+
 type TabType = 'overview' | 'profile' | 'projects' | 'experience' | 'skills';
 
 const AdminDashboard: React.FC = () => {
   const { logout } = useAuth();
-  const { projects, experiences, skills } = useData();
+  const { projects, experiences, skills, exportData, importData, resetToDefaults } = useData();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [editingProject, setEditingProject] = useState<number | null>(null);
+  const [importMessage, setImportMessage] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePreview = () => {
     window.open('/', '_blank');
+  };
+
+  const handleExport = () => {
+    exportData();
+    setImportMessage('Data exported successfully!');
+    setTimeout(() => setImportMessage(''), 3000);
+  };
+
+  const handleImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        await importData(file);
+        setImportMessage('Data imported successfully!');
+        setTimeout(() => setImportMessage(''), 3000);
+      } catch (error) {
+        setImportMessage('Error importing data. Please check the file format.');
+        setTimeout(() => setImportMessage(''), 5000);
+      }
+    }
+  };
+
+  const handleReset = () => {
+    if (window.confirm('Are you sure you want to reset all data to defaults? This cannot be undone.')) {
+      resetToDefaults();
+    }
   };
 
   const tabs = [
@@ -293,6 +373,65 @@ const AdminDashboard: React.FC = () => {
                 Preview Website
               </PreviewButton>
             </ActionButtons>
+
+            <DataManagementButtons>
+              <DataManagementTitle>Data Management</DataManagementTitle>
+              <DataButton
+                variant="export"
+                onClick={handleExport}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FaDownload />
+                Export Data
+              </DataButton>
+              
+              <DataButton
+                variant="import"
+                onClick={handleImport}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FaUpload />
+                Import Data
+              </DataButton>
+              
+              <DataButton
+                variant="reset"
+                onClick={handleReset}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <FaUndo />
+                Reset to Defaults
+              </DataButton>
+              
+              <HiddenFileInput
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+              />
+            </DataManagementButtons>
+
+            {importMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                style={{
+                  padding: '1rem',
+                  background: importMessage.includes('Error') ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                  border: `1px solid ${importMessage.includes('Error') ? '#f44336' : '#4CAF50'}`,
+                  borderRadius: '10px',
+                  color: importMessage.includes('Error') ? '#f44336' : '#4CAF50',
+                  textAlign: 'center',
+                  marginTop: '1rem'
+                }}
+              >
+                {importMessage}
+              </motion.div>
+            )}
           </motion.div>
         )}
 

@@ -5,9 +5,6 @@ interface Props {
 }
 
 class ResizeObserverErrorBoundary extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-  }
 
   componentDidMount() {
     // Suppress ResizeObserver errors

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Project } from '../types';
+import { dataService } from '../services/dataService';
+import { migrationService } from '../services/migrationService';
 
 interface Experience {
   id: number;
@@ -51,6 +53,9 @@ interface DataContextType {
   addSkill: (skill: Skill) => void;
   updateSkill: (name: string, skill: Skill) => void;
   deleteSkill: (name: string) => void;
+  exportData: () => void;
+  importData: (file: File) => Promise<boolean>;
+  resetToDefaults: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -85,34 +90,44 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
-    // Load data from localStorage or use default data
-    const loadData = () => {
+    // Load data from server files with localStorage fallback
+    const loadData = async () => {
       try {
-        const savedProjects = localStorage.getItem('portfolio_projects');
-        const savedExperiences = localStorage.getItem('portfolio_experiences');
-        const savedSkills = localStorage.getItem('portfolio_skills');
-        const savedProfile = localStorage.getItem('portfolio_profile');
+        // Load profile data
+        const profileResult = await dataService.getProfileWithFallback();
+        if (profileResult.success && profileResult.data) {
+          // Migrate data to current version
+          const migratedData = migrationService.migrateData(profileResult.data);
+          setProfile(migratedData.profile || migratedData);
+        } else {
+          // Fallback to default data
+          const defaultData = migrationService.getDefaultData();
+          setProfile(defaultData.profile);
+        }
 
-        if (savedProjects) {
-          const projects = JSON.parse(savedProjects).map((project: any) => ({
+        // Load projects data
+        const projectsResult = await dataService.getProjectsWithFallback();
+        if (projectsResult.success && projectsResult.data) {
+          const projects = Array.isArray(projectsResult.data) 
+            ? projectsResult.data 
+            : projectsResult.data.projects || [];
+          const formattedProjects = projects.map((project: any) => ({
             ...project,
             category: project.category as 'project' | 'dashboard'
           }));
-          setProjects(projects);
+          setProjects(formattedProjects);
         } else {
-          // Load default data
-          import('../data/projects.json').then(data => {
-            const projects = data.projects.map(project => ({
-              ...project,
-              category: project.category as 'project' | 'dashboard'
-            }));
-            setProjects(projects);
-            localStorage.setItem('portfolio_projects', JSON.stringify(projects));
-          });
+          // Fallback to default data
+          const defaultData = migrationService.getDefaultData();
+          setProjects(defaultData.projects || []);
         }
 
-        if (savedExperiences) {
-          const experiences = JSON.parse(savedExperiences);
+        // Load experiences data
+        const experiencesResult = await dataService.getExperiencesWithFallback();
+        if (experiencesResult.success && experiencesResult.data) {
+          const experiences = Array.isArray(experiencesResult.data) 
+            ? experiencesResult.data 
+            : experiencesResult.data.experiences || [];
           // Handle legacy format - convert duration to startDate/endDate if needed
           const updatedExperiences = experiences.map((exp: any) => {
             if (!exp.startDate && exp.duration) {
@@ -136,32 +151,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           });
           setExperiences(updatedExperiences);
         } else {
-          import('../data/experiences.json').then(data => {
-            const experiences = data.experiences.map((exp: any) => ({
-              ...exp,
-              type: exp.type as 'job' | 'education'
-            }));
-            setExperiences(experiences);
-            localStorage.setItem('portfolio_experiences', JSON.stringify(experiences));
-          });
+          // Fallback to default data
+          const defaultData = migrationService.getDefaultData();
+          setExperiences(defaultData.experiences || []);
         }
 
-        if (savedSkills) {
-          setSkills(JSON.parse(savedSkills));
+        // Load skills data
+        const skillsResult = await dataService.getSkillsWithFallback();
+        if (skillsResult.success && skillsResult.data) {
+          const skills = Array.isArray(skillsResult.data) 
+            ? skillsResult.data 
+            : skillsResult.data.skills || [];
+          setSkills(skills);
         } else {
-          import('../data/skills.json').then(data => {
-            setSkills(data.skills as Skill[]);
-            localStorage.setItem('portfolio_skills', JSON.stringify(data.skills));
-          });
-        }
-
-        if (savedProfile) {
-          setProfile(JSON.parse(savedProfile));
-        } else {
-          import('../data/profile.json').then(data => {
-            setProfile(data.profile);
-            localStorage.setItem('portfolio_profile', JSON.stringify(data.profile));
-          });
+          // Fallback to default data
+          const defaultData = migrationService.getDefaultData();
+          setSkills(defaultData.skills || []);
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -171,70 +176,140 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     loadData();
   }, []);
 
-  const updateProjects = (newProjects: Project[]) => {
+  const updateProjects = async (newProjects: Project[]) => {
     setProjects(newProjects);
-    localStorage.setItem('portfolio_projects', JSON.stringify(newProjects));
+    // Update both server and localStorage
+    await dataService.updateProjectsWithFallback(newProjects);
   };
 
-  const updateExperiences = (newExperiences: Experience[]) => {
+  const updateExperiences = async (newExperiences: Experience[]) => {
     setExperiences(newExperiences);
-    localStorage.setItem('portfolio_experiences', JSON.stringify(newExperiences));
+    // Update both server and localStorage
+    await dataService.updateExperiencesWithFallback(newExperiences);
   };
 
-  const updateSkills = (newSkills: Skill[]) => {
+  const updateSkills = async (newSkills: Skill[]) => {
     setSkills(newSkills);
-    localStorage.setItem('portfolio_skills', JSON.stringify(newSkills));
+    // Update both server and localStorage
+    await dataService.updateSkillsWithFallback(newSkills);
   };
 
-  const updateProfile = (newProfile: Partial<Profile>) => {
+  const updateProfile = async (newProfile: Partial<Profile>) => {
     const updatedProfile = { ...profile, ...newProfile };
     setProfile(updatedProfile);
-    localStorage.setItem('portfolio_profile', JSON.stringify(updatedProfile));
+    // Update both server and localStorage
+    await dataService.updateProfileWithFallback(updatedProfile);
   };
 
-  const addProject = (project: Project) => {
+  const addProject = async (project: Project) => {
     const newProjects = [...projects, { ...project, id: Math.max(...projects.map(p => p.id), 0) + 1 }];
-    updateProjects(newProjects);
+    await updateProjects(newProjects);
   };
 
-  const updateProject = (id: number, project: Project) => {
+  const updateProject = async (id: number, project: Project) => {
     const newProjects = projects.map(p => p.id === id ? { ...project, id } : p);
-    updateProjects(newProjects);
+    await updateProjects(newProjects);
   };
 
-  const deleteProject = (id: number) => {
+  const deleteProject = async (id: number) => {
     const newProjects = projects.filter(p => p.id !== id);
-    updateProjects(newProjects);
+    await updateProjects(newProjects);
   };
 
-  const addExperience = (experience: Omit<Experience, 'id'>) => {
+  const addExperience = async (experience: Omit<Experience, 'id'>) => {
     const newExperiences = [...experiences, { ...experience, id: Math.max(...experiences.map(e => e.id), 0) + 1 }];
-    updateExperiences(newExperiences);
+    await updateExperiences(newExperiences);
   };
 
-  const updateExperience = (id: number, experience: Omit<Experience, 'id'>) => {
+  const updateExperience = async (id: number, experience: Omit<Experience, 'id'>) => {
     const newExperiences = experiences.map(e => e.id === id ? { ...experience, id } : e);
-    updateExperiences(newExperiences);
+    await updateExperiences(newExperiences);
   };
 
-  const deleteExperience = (id: number) => {
+  const deleteExperience = async (id: number) => {
     const newExperiences = experiences.filter(e => e.id !== id);
-    updateExperiences(newExperiences);
+    await updateExperiences(newExperiences);
   };
 
-  const addSkill = (skill: Skill) => {
+  const addSkill = async (skill: Skill) => {
     const newSkills = [...skills, skill];
-    updateSkills(newSkills);
+    await updateSkills(newSkills);
   };
 
-  const updateSkill = (name: string, skill: Skill) => {
+  const updateSkill = async (name: string, skill: Skill) => {
     const newSkills = skills.map(s => s.name === name ? skill : s);
-    updateSkills(newSkills);
+    await updateSkills(newSkills);
   };
 
-  const deleteSkill = (name: string) => {
+  const deleteSkill = async (name: string) => {
     const newSkills = skills.filter(s => s.name !== name);
-    updateSkills(newSkills);
+    await updateSkills(newSkills);
+  };
+
+  // Export all data as JSON
+  const exportData = () => {
+    const allData = {
+      profile,
+      projects,
+      experiences,
+      skills,
+      exportDate: new Date().toISOString(),
+      version: '1.0'
+    };
+    
+    const dataStr = JSON.stringify(allData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `portfolio-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Import data from JSON file
+  const importData = (file: File): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target?.result as string);
+          
+          // Validate data structure
+          if (data.profile && data.projects && data.experiences && data.skills) {
+            setProfile(data.profile);
+            setProjects(data.projects);
+            setExperiences(data.experiences);
+            setSkills(data.skills);
+            
+            // Update localStorage
+            localStorage.setItem('portfolio_profile', JSON.stringify(data.profile));
+            localStorage.setItem('portfolio_projects', JSON.stringify(data.projects));
+            localStorage.setItem('portfolio_experiences', JSON.stringify(data.experiences));
+            localStorage.setItem('portfolio_skills', JSON.stringify(data.skills));
+            
+            resolve(true);
+          } else {
+            reject(new Error('Invalid data format'));
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  // Reset to default data
+  const resetToDefaults = () => {
+    localStorage.removeItem('portfolio_profile');
+    localStorage.removeItem('portfolio_projects');
+    localStorage.removeItem('portfolio_experiences');
+    localStorage.removeItem('portfolio_skills');
+    window.location.reload();
   };
 
   const value = {
@@ -254,7 +329,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     deleteExperience,
     addSkill,
     updateSkill,
-    deleteSkill
+    deleteSkill,
+    exportData,
+    importData,
+    resetToDefaults
   };
 
   return (

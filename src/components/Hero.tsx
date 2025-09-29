@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaDownload, FaChevronDown, FaLinkedin, FaArrowUp } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaChevronDown, FaLinkedin, FaArrowUp } from 'react-icons/fa';
 import { useData } from '../contexts/DataContext';
 
 const float = keyframes`
@@ -41,10 +41,6 @@ const pulseBorder = keyframes`
   }
 `;
 
-const blink = keyframes`
-  0%, 50% { border-color: transparent; }
-  51%, 100% { border-color: #40e0ff; }
-`;
 
 const HeroContainer = styled.section`
   min-height: 100vh;
@@ -444,45 +440,6 @@ const ContactIcon = styled.span`
   min-width: 1rem;
 `;
 
-const ActionButtons = styled(motion.div)`
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  width: 100%;
-`;
-
-const Button = styled(motion.a)`
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  cursor: pointer;
-
-  &.primary {
-    background: linear-gradient(45deg, #40e0ff, #64c8ff);
-    color: #1a1a2e;
-    border: none;
-
-    &:hover {
-      box-shadow: 0 10px 30px rgba(64, 224, 255, 0.3);
-      transform: translateY(-2px);
-    }
-  }
-
-  &.secondary {
-    background: transparent;
-    color: #40e0ff;
-    border: 2px solid #40e0ff;
-
-    &:hover {
-      background: #40e0ff;
-      color: #1a1a2e;
-      box-shadow: 0 10px 30px rgba(64, 224, 255, 0.3);
-    }
-  }
-`;
 
 const ScrollArrow = styled(motion.div)`
   position: absolute;
@@ -524,7 +481,7 @@ const ScrollToTopButton = styled(motion.button)`
   height: 60px;
   border-radius: 50%;
   background: linear-gradient(135deg, #40e0ff, #00bfff);
-  border: 2px solid rgba(64, 224, 255, 0.3);
+  border: 2px solid rgba(64, 224, 255, 0.4);
   color: white;
   font-size: 1.5rem;
   cursor: pointer;
@@ -534,11 +491,13 @@ const ScrollToTopButton = styled(motion.button)`
   justify-content: center;
   transition: all 0.3s ease;
   animation: ${css`${glow} 3s ease-in-out infinite`};
+  box-shadow: 0 4px 20px rgba(64, 224, 255, 0.3);
   
   &:hover {
     animation: ${css`${floatUp} 1s ease-in-out infinite`};
-    box-shadow: 0 0 40px rgba(64, 224, 255, 0.8);
+    box-shadow: 0 8px 30px rgba(64, 224, 255, 0.6);
     transform: scale(1.1);
+    border-color: rgba(64, 224, 255, 0.8);
   }
   
   &:active {

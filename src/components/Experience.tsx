@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { FaBriefcase, FaGraduationCap, FaCalendarAlt, FaMapMarkerAlt, FaChevronRight } from 'react-icons/fa';
+import { FaBriefcase, FaGraduationCap, FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { useData } from '../contexts/DataContext';
 
 const ExperienceContainer = styled.section`
@@ -331,7 +331,7 @@ const Experience: React.FC = () => {
   const { experiences } = useData();
   const [activeFilter, setActiveFilter] = useState<'all' | 'job' | 'education'>('all');
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   // Sort experiences by start date (newest first)
   const sortedExperiences = [...experiences].sort((a, b) => {
