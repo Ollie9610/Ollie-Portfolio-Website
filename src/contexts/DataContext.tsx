@@ -110,7 +110,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         if (projectsResult.success && projectsResult.data) {
           const projects = Array.isArray(projectsResult.data) 
             ? projectsResult.data 
-            : projectsResult.data.projects || [];
+            : (projectsResult.data as any).projects || [];
           const formattedProjects = projects.map((project: any) => ({
             ...project,
             category: project.category as 'project' | 'dashboard'
@@ -127,7 +127,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         if (experiencesResult.success && experiencesResult.data) {
           const experiences = Array.isArray(experiencesResult.data) 
             ? experiencesResult.data 
-            : experiencesResult.data.experiences || [];
+            : (experiencesResult.data as any).experiences || [];
           // Handle legacy format - convert duration to startDate/endDate if needed
           const updatedExperiences = experiences.map((exp: any) => {
             if (!exp.startDate && exp.duration) {
@@ -161,7 +161,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         if (skillsResult.success && skillsResult.data) {
           const skills = Array.isArray(skillsResult.data) 
             ? skillsResult.data 
-            : skillsResult.data.skills || [];
+            : (skillsResult.data as any).skills || [];
           setSkills(skills);
         } else {
           // Fallback to default data
