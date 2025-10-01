@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
-import { useData } from '../contexts/DataContext';
 import ProfileEditor from './ProfileEditor';
 import SkillsEditor from './SkillsEditor';
 import ProjectEditor from './ProjectEditor';

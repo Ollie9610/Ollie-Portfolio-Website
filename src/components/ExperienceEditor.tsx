@@ -237,7 +237,7 @@ const ExperienceEditor: React.FC = () => {
     description: '',
     type: 'job' as 'job' | 'education',
     startDate: '',
-    endDate: '',
+    endDate: null as string | null,
     location: '',
     duration: '',
     achievements: [] as string[],
@@ -252,7 +252,7 @@ const ExperienceEditor: React.FC = () => {
       description: '',
       type: 'job',
       startDate: '',
-      endDate: '',
+      endDate: null,
       location: '',
       duration: '',
       achievements: [],
@@ -268,7 +268,7 @@ const ExperienceEditor: React.FC = () => {
       description: experiences[index].description,
       type: experiences[index].type,
       startDate: experiences[index].startDate,
-      endDate: experiences[index].endDate || '',
+      endDate: experiences[index].endDate || null,
       location: experiences[index].location,
       duration: experiences[index].duration,
       achievements: experiences[index].achievements || [],
@@ -278,6 +278,7 @@ const ExperienceEditor: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
       if (editingExperience === -1) {
         await addExperience(formData);
@@ -291,7 +292,7 @@ const ExperienceEditor: React.FC = () => {
         description: '',
         type: 'job',
         startDate: '',
-        endDate: '',
+        endDate: null,
         location: '',
         duration: '',
         achievements: [],
@@ -310,7 +311,7 @@ const ExperienceEditor: React.FC = () => {
       description: '',
       type: 'job',
       startDate: '',
-      endDate: '',
+      endDate: null,
       location: '',
       duration: '',
       achievements: [],
@@ -464,8 +465,8 @@ const ExperienceEditor: React.FC = () => {
             <Input
               type="month"
               id="endDate"
-              value={formData.endDate}
-              onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+              value={formData.endDate ?? ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value || null }))}
             />
           </FormGroup>
 

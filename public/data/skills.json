@@ -2,88 +2,8 @@
   "skills": [
     {
       "name": "Python",
-      "dots": 3,
-      "category": "Programming & Query Languages"
-    },
-    {
-      "name": "R",
-      "dots": 3,
-      "category": "Programming & Query Languages"
-    },
-    {
-      "name": "SQL",
-      "dots": 3,
-      "category": "Programming & Query Languages"
-    },
-    {
-      "name": "JavaScript",
-      "dots": 3,
-      "category": "Programming & Query Languages"
-    },
-    {
-      "name": "Power BI",
-      "dots": 3,
-      "category": "Analytics & Data Platforms"
-    },
-    {
-      "name": "Tableau",
-      "dots": 3,
-      "category": "Analytics & Data Platforms"
-    },
-    {
-      "name": "AWS",
       "dots": 2,
-      "category": "Analytics & Data Platforms"
-    },
-    {
-      "name": "Azure",
-      "dots": 2,
-      "category": "Analytics & Data Platforms"
-    },
-    {
-      "name": "PostgreSQL",
-      "dots": 3,
-      "category": "Application Development & Automation"
-    },
-    {
-      "name": "MySQL",
-      "dots": 3,
-      "category": "Application Development & Automation"
-    },
-    {
-      "name": "MongoDB",
-      "dots": 2,
-      "category": "Application Development & Automation"
-    },
-    {
-      "name": "Machine Learning",
-      "dots": 3,
-      "category": "Application Development & Automation"
-    },
-    {
-      "name": "Statistical Analysis",
-      "dots": 3,
-      "category": "Analytics & Data Platforms"
-    },
-    {
-      "name": "Data Visualization",
-      "dots": 3,
-      "category": "Analytics & Data Platforms"
-    },
-    {
-      "name": "Project Management",
-      "dots": 2,
-      "category": "Business Systems"
-    },
-    {
-      "name": "Communication",
-      "dots": 3,
-      "category": "Business Systems"
-    },
-    {
-      "name": "Problem Solving",
-      "dots": 3,
-      "category": "Business Systems"
+      "category": "Programming & Query Languages"
     }
   ]
 }

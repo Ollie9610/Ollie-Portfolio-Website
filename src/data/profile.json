@@ -1,11 +1,11 @@
 {
   "profile": {
-    "name": "Test User",
-    "location": "Test City, Country",
-    "email": "test@example.com",
-    "profileImage": "/api/placeholder/300/300",
-    "bio": "This is a test bio to verify the update script works correctly.",
-    "roles": "Developer\nDesigner\nTester",
-    "linkedin": "https://linkedin.com/in/testuser"
+    "name": "Ollie Gillyon",
+    "location": "London, UK",
+    "email": "ollie.gillyon@example.com",
+    "profileImage": "",
+    "bio": "Passionate data analyst with expertise in transforming complex datasets into actionable business insights. Specialized in Power BI, SQL, and Python with a proven track record of delivering data-driven solutions that drive growth and efficiency.",
+    "roles": "Senior Data Analyst\nBusiness Intelligence Developer\nData Visualization Specialist",
+    "linkedin": "https://linkedin.com/in/ollie-gillyon"
   }
 }

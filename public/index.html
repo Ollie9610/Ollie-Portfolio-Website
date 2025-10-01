@@ -17,71 +17,96 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>Ollie Gillyon</title>
     <script>
-      // Ultra-aggressive ResizeObserver error suppression
+      // ULTRA-AGGRESSIVE ResizeObserver disabling - runs before ANYTHING else
       (function() {
-        // Override console methods immediately
+        // Disable ResizeObserver before it can be used
+        if (typeof window !== 'undefined' && window.ResizeObserver) {
+          const OriginalResizeObserver = window.ResizeObserver;
+          window.ResizeObserver = function() {
+            return {
+              observe: function() {},
+              unobserve: function() {},
+              disconnect: function() {}
+            };
+          };
+        }
+        
+        // Override error handling at the most basic level
+        const originalOnError = window.onerror;
+        window.onerror = function(message, source, lineno, colno, error) {
+          if (typeof message === 'string' && message.includes('ResizeObserver')) {
+            return true; // Prevent default error handling
+          }
+          if (originalOnError) {
+            return originalOnError.call(this, message, source, lineno, colno, error);
+          }
+          return false;
+        };
+      })();
+    </script>
+    <script>
+      // AGGRESSIVE ResizeObserver disabling - runs before ANY other code
+      (function() {
+        // Disable ResizeObserver immediately
+        if (window.ResizeObserver) {
+          window.ResizeObserver = function() {
+            return {
+              observe: function() {},
+              unobserve: function() {},
+              disconnect: function() {}
+            };
+          };
+        }
+        
+        // Suppress ALL ResizeObserver errors
         const originalError = console.error;
         const originalWarn = console.warn;
         const originalLog = console.log;
         
         console.error = function(...args) {
-          if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
+          if (typeof args[0] === 'string' && args[0].includes('ResizeObserver')) {
             return;
           }
           originalError.apply(console, args);
         };
         
         console.warn = function(...args) {
-          if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
+          if (typeof args[0] === 'string' && args[0].includes('ResizeObserver')) {
             return;
           }
           originalWarn.apply(console, args);
         };
         
         console.log = function(...args) {
-          if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
+          if (typeof args[0] === 'string' && args[0].includes('ResizeObserver')) {
             return;
           }
           originalLog.apply(console, args);
         };
         
-        // Multiple error handlers
+        // Suppress unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+          if (event.reason && event.reason.message && event.reason.message.includes('ResizeObserver')) {
+            event.preventDefault();
+          }
+        });
+        
+        // Suppress global errors
+        window.addEventListener('error', function(e) {
+          if (e.message && e.message.includes('ResizeObserver')) {
+            e.preventDefault();
+            return false;
+          }
+        });
+        
+        // Override the error handler that's causing the issue
         window.addEventListener('error', function(e) {
           if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
-            e.preventDefault();
-            e.stopPropagation();
             e.stopImmediatePropagation();
+            e.preventDefault();
             return false;
           }
         }, true);
-        
-        window.addEventListener('error', function(e) {
-          if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
-          }
-        }, false);
-        
-        // Override again after a short delay
-        setTimeout(function() {
-          console.error = function(...args) {
-            if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
-              return;
-            }
-            originalError.apply(console, args);
-          };
-        }, 50);
-        
-        setTimeout(function() {
-          console.error = function(...args) {
-            if (typeof args[0] === 'string' && args[0].includes('ResizeObserver loop completed with undelivered notifications')) {
-              return;
-            }
-            originalError.apply(console, args);
-          };
-        }, 200);
       })();
     </script>
   </head>

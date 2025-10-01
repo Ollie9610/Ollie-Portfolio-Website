@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaUsers, FaClock, FaTrophy, FaInfoCircle } from 'react-icons/fa';
+import { FaTimes, FaClock, FaTrophy, FaInfoCircle } from 'react-icons/fa';
 import { Project } from '../types';
 import { useData } from '../contexts/DataContext';
 

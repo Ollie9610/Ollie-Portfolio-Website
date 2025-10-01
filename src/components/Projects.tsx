@@ -1,17 +1,22 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { FaExternalLinkAlt, FaEye, FaClock, FaProjectDiagram, FaChartBar } from 'react-icons/fa';
+import { FaProjectDiagram, FaChartBar } from 'react-icons/fa';
 import { Project } from '../types';
 import { useData } from '../contexts/DataContext';
 
 const ProjectsContainer = styled.section`
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, 
+    rgba(15, 23, 42, 0.8) 0%, 
+    rgba(30, 41, 59, 0.9) 50%, 
+    rgba(15, 23, 42, 0.8) 100%
+  );
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
 `;
+
 
 const ProjectsContent = styled.div`
   padding: 6rem 2rem;
@@ -49,33 +54,20 @@ const TypographyContainer = styled(motion.div)`
   gap: 0.2rem;
 `;
 
-const SectionTitle = styled(motion.h2)`
-  font-size: 4rem;
-  font-weight: 100;
-  background: linear-gradient(135deg, 
-    #ffffff 0%, 
-    rgba(64, 224, 255, 0.95) 30%,
-    rgba(100, 200, 255, 0.8) 70%,
-    #ffffff 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.1;
-  letter-spacing: -2px;
-  position: relative;
-  text-shadow: 0 0 30px rgba(64, 224, 255, 0.3);
-  filter: drop-shadow(0 0 20px rgba(64, 224, 255, 0.2));
-  margin: 0;
+const SectionTitle = styled.h2`
+  font-size: 3rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
 
   @media (max-width: 768px) {
-    font-size: 3rem;
-    letter-spacing: -1px;
+    font-size: 2.5rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 2.5rem;
-    letter-spacing: -0.5px;
+    font-size: 2rem;
   }
 `;
 
@@ -101,26 +93,20 @@ const TitleAccent = styled(motion.div)`
   }
 `;
 
-const SectionSubtitle = styled(motion.p)`
-  font-size: 0.9rem;
-  color: rgba(64, 224, 255, 0.8);
-  font-weight: 300;
-  letter-spacing: 4px;
-  line-height: 1.4;
-  text-transform: uppercase;
-  position: relative;
+const SectionSubtitle = styled.p`
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
   margin: 0;
-  text-shadow: 0 0 10px rgba(64, 224, 255, 0.2);
-  overflow: hidden;
+  font-weight: 400;
+  line-height: 1.6;
 
   @media (max-width: 768px) {
-    font-size: 0.8rem;
-    letter-spacing: 3px;
+    font-size: 1rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 0.7rem;
-    letter-spacing: 2px;
+    font-size: 0.95rem;
   }
 `;
 
@@ -135,14 +121,6 @@ const ParticleTrail = styled.div`
   z-index: 0;
 `;
 
-const Particle = styled(motion.div)`
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle, rgba(64, 224, 255, 1) 0%, rgba(64, 224, 255, 0.6) 50%, transparent 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgba(64, 224, 255, 0.8), 0 0 24px rgba(64, 224, 255, 0.4);
-`;
 
 const SubtitleAccent = styled(motion.div)`
   width: 100px;
@@ -225,103 +203,126 @@ const SubsectionDescription = styled(motion.p)`
 `;
 
 
+const ViewButton = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+`;
+
 const ShowMoreButton = styled.button`
   padding: 12px 24px;
-  background: linear-gradient(45deg, #40e0ff, #00bfff);
-  border: 2px solid rgba(64, 224, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   color: white;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: block;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin: 20px auto 0;
   width: fit-content;
-  box-shadow: 0 4px 15px rgba(64, 224, 255, 0.3);
-  
+  backdrop-filter: blur(10px);
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(64, 224, 255, 0.5);
-    border-color: rgba(64, 224, 255, 0.8);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
   }
-  
+
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 20px;
+    font-size: 13px;
   }
 `;
 
 const ProjectsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
 
   @media (max-width: 1024px) {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.7rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
   }
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: 0.8rem;
-    margin-bottom: 1rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 `;
 
 
-const ProjectCard = styled(motion.div)`
-  background: rgba(64, 224, 255, 0.15);
-  border-radius: 30px;
-  overflow: hidden;
-  border: 1px solid rgba(64, 224, 255, 0.3);
-  backdrop-filter: blur(20px);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+const ProjectCard = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
 
   @media (max-width: 768px) {
-    border-radius: 20px;
+    min-height: 280px;
   }
 
   @media (max-width: 480px) {
-    border-radius: 15px;
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, 
-      rgba(64, 224, 255, 0.1), 
-      transparent, 
-      rgba(100, 200, 255, 0.1)
-    );
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    z-index: 1;
-  }
-
-  &:hover {
-    transform: translateY(-15px) scale(1.02);
-    box-shadow: 0 25px 50px rgba(64, 224, 255, 0.2);
-    border-color: rgba(64, 224, 255, 0.4);
-
-    &::before {
-      opacity: 1;
-    }
+    min-height: 260px;
   }
 `;
 
@@ -330,111 +331,93 @@ const ProjectCard = styled(motion.div)`
 
 
 const ProjectContent = styled.div`
-  padding: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
 
   @media (max-width: 768px) {
-    padding: 0.8rem;
+    padding: 1.2rem;
+    gap: 0.8rem;
   }
 
   @media (max-width: 480px) {
-    padding: 0.7rem;
+    padding: 1rem;
+    gap: 0.6rem;
   }
 `;
 
 const ProjectTitle = styled.h3`
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: white;
-  margin-bottom: 0.5rem;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 
   @media (max-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 `;
 
 const ProjectDescription = styled.p`
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.4;
-  margin-bottom: 0.8rem;
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.95rem;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-grow: 1;
 
   @media (max-width: 768px) {
-    font-size: 0.85rem;
-    line-height: 1.3;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    -webkit-line-clamp: 2;
   }
 
   @media (max-width: 480px) {
-    font-size: 0.8rem;
-    line-height: 1.2;
+    font-size: 0.85rem;
+    line-height: 1.4;
   }
 `;
 
 const ProjectTechnologies = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 0.8rem;
+  gap: 0.5rem;
+  margin: 0;
 
   @media (max-width: 480px) {
-    gap: 0.3rem;
+    gap: 0.4rem;
   }
 `;
 
 const TechnologyTag = styled.span<{ category?: string }>`
-  background: ${props => {
-    if (!props.category) return 'rgba(255, 215, 0, 0.2)';
-    switch (props.category) {
-      case 'Programming & Query Languages': return 'rgba(25, 118, 210, 0.2)';
-      case 'Analytics & Data Platforms': return 'rgba(123, 31, 162, 0.2)';
-      case 'Application Development & Automation': return 'rgba(56, 142, 60, 0.2)';
-      case 'Business Systems': return 'rgba(245, 124, 0, 0.2)';
-      default: return 'rgba(255, 215, 0, 0.2)';
-    }
-  }};
-  color: ${props => {
-    if (!props.category) return '#ffd700';
-    switch (props.category) {
-      case 'Programming & Query Languages': return '#1976d2';
-      case 'Analytics & Data Platforms': return '#7b1fa2';
-      case 'Application Development & Automation': return '#388e3c';
-      case 'Business Systems': return '#f57c00';
-      default: return '#ffd700';
-    }
-  }};
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  background: rgba(64, 224, 255, 0.15);
+  color: rgba(64, 224, 255, 0.9);
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
   font-weight: 500;
-  border: 1px solid ${props => {
-    if (!props.category) return 'rgba(255, 215, 0, 0.3)';
-    switch (props.category) {
-      case 'Programming & Query Languages': return 'rgba(25, 118, 210, 0.3)';
-      case 'Analytics & Data Platforms': return 'rgba(123, 31, 162, 0.3)';
-      case 'Application Development & Automation': return 'rgba(56, 142, 60, 0.3)';
-      case 'Business Systems': return 'rgba(245, 124, 0, 0.3)';
-      default: return 'rgba(255, 215, 0, 0.3)';
-    }
-  }};
+  border: 1px solid rgba(64, 224, 255, 0.2);
+  backdrop-filter: blur(10px);
 
   @media (max-width: 768px) {
     font-size: 0.75rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 12px;
+    padding: 0.25rem 0.7rem;
   }
 
   @media (max-width: 480px) {
     font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 10px;
+    padding: 0.2rem 0.6rem;
   }
 `;
 
@@ -500,7 +483,6 @@ interface ProjectsProps {
 const Projects: React.FC<ProjectsProps> = ({ projects, onProjectSelect, loading }) => {
   const { skills } = useData();
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [showAllDashboards, setShowAllDashboards] = useState(false);
 
@@ -531,29 +513,6 @@ const Projects: React.FC<ProjectsProps> = ({ projects, onProjectSelect, loading 
   const renderProjectCard = (project: Project, index: number) => (
     <ProjectCard
       key={project.id}
-      initial={{ opacity: 0, y: 50, rotateX: -15 }}
-      animate={isInView ? { 
-        opacity: 1, 
-        y: 0, 
-        rotateX: 0,
-        scale: 1
-      } : { 
-        opacity: 0, 
-        y: 50, 
-        rotateX: -15,
-        scale: 0.9
-      }}
-      transition={{ 
-        duration: 0.8, 
-        delay: index * 0.15,
-        ease: "easeOut"
-      }}
-      whileHover={{ 
-        scale: 1.05,
-        rotateY: 5,
-        z: 50
-      }}
-      whileTap={{ scale: 0.95 }}
       onClick={() => onProjectSelect(project)}
     >
       
@@ -575,14 +534,11 @@ const Projects: React.FC<ProjectsProps> = ({ projects, onProjectSelect, loading 
         </ProjectTechnologies>
         
         
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: '0.8rem', 
-          color: 'rgba(255, 255, 255, 0.6)', 
-          fontSize: '0.8rem',
-          fontStyle: 'italic'
-        }}>
-          Click to view more →
+        <div style={{ textAlign: 'center', marginTop: 'auto' }}>
+          <ViewButton>
+            <span>View Details</span>
+            <span>→</span>
+          </ViewButton>
         </div>
       </ProjectContent>
     </ProjectCard>
@@ -591,99 +547,27 @@ const Projects: React.FC<ProjectsProps> = ({ projects, onProjectSelect, loading 
   return (
     <ProjectsContainer id="projects" ref={ref}>
       <ProjectsContent>
-        <SectionHeader
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.8 }}
-        >
-          <TypographyContainer
-            animate={{
-              textShadow: [
-                "0 0 30px rgba(64, 224, 255, 0.3)",
-                "0 0 50px rgba(64, 224, 255, 0.6)",
-                "0 0 30px rgba(64, 224, 255, 0.3)"
-              ]
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <SectionTitle>
-              Stuff I've worked on...
-            </SectionTitle>
-            
-            <TitleAccent
-              animate={{
-                scaleX: [0.8, 1.2, 0.8],
-                opacity: [0.6, 1, 0.6]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            
-            <SectionSubtitle
-              initial={{ opacity: 0, y: 10 }}
-              animate={isInView ? { opacity: 0.8, y: 0 } : { opacity: 0, y: 10 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <ParticleTrail>
-                {[...Array(8)].map((_, i) => (
-                  <Particle
-                    key={i}
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                    }}
-                  animate={{
-                    x: [0, Math.random() * 80 - 40],
-                    y: [0, Math.random() * 40 - 20],
-                    opacity: [0, 1, 0.6, 1, 0],
-                    scale: [0, 1.5, 0.8, 1.2, 0]
-                  }}
-                  transition={{
-                    duration: 2 + Math.random() * 1.5,
-                    repeat: Infinity,
-                    delay: Math.random() * 3,
-                    ease: "easeInOut"
-                  }}
-                  />
-                ))}
-              </ParticleTrail>
-              A selection of things I've brought to life
-            </SectionSubtitle>
-            
-            <SubtitleAccent
-              initial={{ scaleX: 0 }}
-              animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            />
-          </TypographyContainer>
+        <SectionHeader>
+          <SectionTitle>
+            My Work
+          </SectionTitle>
+          
+          <SectionSubtitle>
+            A showcase of {projects.length} projects and dashboards I've created
+          </SectionSubtitle>
         </SectionHeader>
 
-      {/* Projects Delivered Section */}
+      {/* Projects Section */}
       <ProjectsSection>
-        <SubsectionTitle
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
+        <SubsectionTitle>
           <SubsectionIcon>
             <FaProjectDiagram />
           </SubsectionIcon>
-          Projects Delivered
+          Projects
         </SubsectionTitle>
         
-        <SubsectionDescription
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          End-to-end data analysis projects and machine learning solutions
+        <SubsectionDescription>
+          Data analysis projects and machine learning solutions
         </SubsectionDescription>
 
         <ProjectsGrid>
@@ -693,30 +577,33 @@ const Projects: React.FC<ProjectsProps> = ({ projects, onProjectSelect, loading 
           <ShowMoreButton 
             onClick={() => setShowAllProjects(!showAllProjects)}
           >
-            {showAllProjects ? 'Show Less' : `Show More (${projectItems.length - 6} more)`}
+            {showAllProjects ? (
+              <>
+                <span>👆</span>
+                <span>Show Less</span>
+              </>
+            ) : (
+              <>
+                <span>🚀</span>
+                <span>Explore More Projects</span>
+                <span style={{ fontSize: '12px', opacity: 0.8 }}>({projectItems.length - 6} more)</span>
+              </>
+            )}
           </ShowMoreButton>
         )}
       </ProjectsSection>
 
-      {/* Dashboards & Models Section */}
+      {/* Dashboards Section */}
       <ProjectsSection>
-        <SubsectionTitle
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
+        <SubsectionTitle>
           <SubsectionIcon>
             <FaChartBar />
           </SubsectionIcon>
-          Dashboards & Models
+          Dashboards
         </SubsectionTitle>
         
-        <SubsectionDescription
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          Interactive dashboards and analytical models for real-time insights
+        <SubsectionDescription>
+          Interactive dashboards and analytical models
         </SubsectionDescription>
 
         <ProjectsGrid>
@@ -726,7 +613,18 @@ const Projects: React.FC<ProjectsProps> = ({ projects, onProjectSelect, loading 
           <ShowMoreButton 
             onClick={() => setShowAllDashboards(!showAllDashboards)}
           >
-            {showAllDashboards ? 'Show Less' : `Show More (${dashboardItems.length - 6} more)`}
+            {showAllDashboards ? (
+              <>
+                <span>👆</span>
+                <span>Show Less</span>
+              </>
+            ) : (
+              <>
+                <span>📊</span>
+                <span>Discover More Dashboards</span>
+                <span style={{ fontSize: '12px', opacity: 0.8 }}>({dashboardItems.length - 6} more)</span>
+              </>
+            )}
           </ShowMoreButton>
         )}
       </ProjectsSection>

@@ -632,26 +632,33 @@ const ProjectEditor: React.FC = () => {
     };
 
     try {
-      if (editingProject && editingProject.id && editingProject.id > 0) {
-        await updateProject(editingProject.id, projectData);
-        setStatus({ message: `✅ ${editingCategory === 'dashboard' ? 'Dashboard' : 'Project'} updated successfully!`, success: true });
-      } else {
-        await addProject(projectData);
-        setStatus({ message: `✅ ${editingCategory === 'dashboard' ? 'Dashboard' : 'Project'} added successfully!`, success: true });
-      }
-      
-      setEditingProject(null);
-      setFormData({
-        title: '',
-        briefDescription: '',
-        description: '',
-        technologies: [],
-        keyResults: ''
-      });
-      
-      setTimeout(() => setStatus(null), 3000);
+      // Use setTimeout to defer the state updates and prevent ResizeObserver errors
+      setTimeout(async () => {
+        try {
+          if (editingProject && editingProject.id && editingProject.id > 0) {
+            await updateProject(editingProject.id, projectData);
+            setStatus({ message: `✅ ${editingCategory === 'dashboard' ? 'Dashboard' : 'Project'} updated successfully!`, success: true });
+          } else {
+            await addProject(projectData);
+            setStatus({ message: `✅ ${editingCategory === 'dashboard' ? 'Dashboard' : 'Project'} added successfully!`, success: true });
+          }
+          
+          setEditingProject(null);
+          setFormData({
+            title: '',
+            briefDescription: '',
+            description: '',
+            technologies: [],
+            keyResults: ''
+          });
+          
+          setTimeout(() => setStatus(null), 3000);
+        } catch (error) {
+          setStatus({ message: '❌ Error saving project. Please try again.', success: false });
+        }
+      }, 0);
     } catch (error) {
-      setStatus({ message: '❌ Error saving project. Please try again.', success: false });
+      setStatus({ message: '❌ Error in form submission. Please try again.', success: false });
     }
   };
 

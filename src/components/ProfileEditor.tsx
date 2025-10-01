@@ -249,96 +249,8 @@ const RoleInputContainer = styled.div`
   flex: 1;
 `;
 
-const RoleButton = styled.button<{ variant: 'add' | 'remove' }>`
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  
-  ${props => props.variant === 'add' ? `
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-    border: 1px solid rgba(76, 175, 80, 0.4);
-    
-    &:hover {
-      background: rgba(76, 175, 80, 0.3);
-      transform: scale(1.1);
-    }
-    
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-  ` : `
-    background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
-    border: 1px solid rgba(244, 67, 54, 0.4);
-    
-    &:hover {
-      background: rgba(244, 67, 54, 0.3);
-      transform: scale(1.1);
-    }
-    
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-  `}
-`;
 
-const RolesHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 12px;
-  background: rgba(64, 224, 255, 0.05);
-  border: 1px solid rgba(64, 224, 255, 0.2);
-  border-radius: 8px;
-`;
 
-const AddRoleButton = styled.button`
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #40e0ff, #00bfff);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 3px 10px rgba(64, 224, 255, 0.3);
-  
-  &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00bfff, #40e0ff);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(64, 224, 255, 0.4);
-  }
-  
-  &:active:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(64, 224, 255, 0.3);
-  }
-  
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: 0 2px 6px rgba(64, 224, 255, 0.2);
-  }
-`;
 
 const FormSection = styled.div`
   background: rgba(255, 255, 255, 0.05);
@@ -426,7 +338,6 @@ const ProfileEditor: React.FC = () => {
     email: profile?.email || '',
     profileImage: profile?.profileImage || '',
     bio: profile?.bio || '',
-    greeting: 'Hi I\'m',
     roles: profile?.roles || '',
     linkedin: profile?.linkedin || ''
   });
@@ -705,7 +616,7 @@ const ProfileEditor: React.FC = () => {
             )}
             <div>
               <p style={{ margin: '0 0 5px 0', fontSize: '18px', fontWeight: '600' }}>
-                {formData.greeting} {formData.name || 'Not set'}
+                Hi, I'm {formData.name || 'Not set'}
               </p>
               <p style={{ margin: '0 0 5px 0', color: 'rgba(255, 255, 255, 0.7)' }}>
                 {formData.location || 'Not set'}

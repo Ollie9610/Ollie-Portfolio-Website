@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaMapMarkerAlt, FaEnvelope, FaPhone, FaChevronDown, FaLinkedin, FaArrowUp } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaEnvelope, FaChevronDown, FaLinkedin, FaArrowUp } from 'react-icons/fa';
 import { useData } from '../contexts/DataContext';
 
 const float = keyframes`
@@ -566,7 +566,7 @@ const Hero: React.FC = () => {
   useEffect(() => {
     if (hasAnimated) return;
     
-    const greeting = profile.greeting || "Hi, I'm";
+    const greeting = "Hi, I'm";
     const name = "Ollie"; // Hardcoded as requested
     
     setTimeout(() => {
@@ -612,7 +612,7 @@ const Hero: React.FC = () => {
       
       typeGreeting();
     }, 1000);
-  }, [profile.greeting, hasAnimated]);
+  }, [hasAnimated]);
 
   // Role rotation effect
   useEffect(() => {
@@ -939,7 +939,7 @@ const Hero: React.FC = () => {
                 </RoleItem>
               )) : (
                 <RoleItem $isActive={true}>
-                  {profile.title || 'Professional'}
+                  Professional
                 </RoleItem>
               )}
             </RoleContainer>
@@ -974,12 +974,6 @@ const Hero: React.FC = () => {
               <ContactIcon><FaLinkedin /></ContactIcon>
               <span>{getLinkedInDisplay(profile.linkedin || "https://linkedin.com/in/ollie-gillyon")}</span>
             </ContactLink>
-            {profile.phone && (
-              <ContactItem>
-                <ContactIcon><FaPhone /></ContactIcon>
-                <span>{profile.phone}</span>
-              </ContactItem>
-            )}
           </ContactInfo>
 
         </TextSection>

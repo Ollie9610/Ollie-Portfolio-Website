@@ -24,9 +24,6 @@ class MigrationService {
             profile: {
               ...data.profile,
               // Add new fields with defaults
-              website: data.profile.website || '',
-              github: data.profile.github || '',
-              twitter: data.profile.twitter || '',
               // Ensure all required fields exist
               name: data.profile.name || 'Your Name',
               bio: data.profile.bio || 'Add your bio here',

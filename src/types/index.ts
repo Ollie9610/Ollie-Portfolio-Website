@@ -16,18 +16,12 @@ export interface Skill {
 
 export interface Profile {
   name: string;
-  title?: string;
   location: string;
   email: string;
-  phone?: string;
   profileImage: string;
   bio: string;
-  greeting?: string;
   roles: string;
   linkedin: string;
-  website?: string;
-  github?: string;
-  twitter?: string;
 }
 
 export interface Experience {

@@ -40,13 +40,10 @@ interface DataProviderProps {
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [profile, setProfile] = useState<Profile>({
     name: '',
-    title: '',
-    email: '',
-    phone: '',
     location: '',
-    profileImage: '/api/placeholder/300/300',
+    email: '',
+    profileImage: '',
     bio: '',
-    greeting: 'Hi, I\'m',
     roles: 'Data Analyst',
     linkedin: ''
   });
@@ -58,12 +55,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   useEffect(() => {
     // Load data from localStorage first (from offline editor), then fallback to server
     const loadData = async () => {
-        console.log('🔄 Loading portfolio data...');
-        console.log('🔍 Checking localStorage keys:', Object.keys(localStorage).filter(key => key.startsWith('portfolio_')));
-        console.log('🔍 localStorage profile:', localStorage.getItem('portfolio_profile'));
-        console.log('🔍 localStorage skills:', localStorage.getItem('portfolio_skills'));
-        console.log('🔍 localStorage projects:', localStorage.getItem('portfolio_projects'));
-        console.log('🔍 localStorage experiences:', localStorage.getItem('portfolio_experiences'));
       
       try {
         // Load Profile from localStorage
@@ -72,7 +63,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           try {
             const profileData = JSON.parse(savedProfile);
             setProfile(profileData.profile || profileData);
-            console.log('✅ Profile loaded from localStorage:', profileData.profile || profileData);
           } catch (error) {
             console.error('❌ Error parsing profile from localStorage:', error);
             // Load from server as fallback
@@ -80,11 +70,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             if (profileResult.success && profileResult.data) {
               const migratedData = migrationService.migrateData(profileResult.data);
               setProfile(migratedData.profile || migratedData);
-              console.log('✅ Profile loaded from server (fallback)');
             } else {
               const defaultData = migrationService.getDefaultData();
               setProfile(defaultData.profile);
-              console.log('✅ Profile loaded from defaults');
             }
           }
         } else {
@@ -93,11 +81,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           if (profileResult.success && profileResult.data) {
             const migratedData = migrationService.migrateData(profileResult.data);
             setProfile(migratedData.profile || migratedData);
-            console.log('✅ Profile loaded from server');
           } else {
             const defaultData = migrationService.getDefaultData();
             setProfile(defaultData.profile);
-            console.log('✅ Profile loaded from defaults');
           }
         }
 
@@ -112,7 +98,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               category: project.category as 'project' | 'dashboard'
             }));
             setProjects(formattedProjects);
-            console.log('✅ Projects loaded from localStorage');
           } catch (error) {
             console.error('❌ Error parsing projects from localStorage:', error);
             // Load from server as fallback
@@ -124,11 +109,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
                 category: project.category as 'project' | 'dashboard'
               }));
               setProjects(formattedProjects);
-              console.log('✅ Projects loaded from server (fallback)');
             } else {
               const defaultData = migrationService.getDefaultData();
               setProjects(defaultData.projects || []);
-              console.log('✅ Projects loaded from defaults');
             }
           }
         } else {
@@ -141,22 +124,20 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               category: project.category as 'project' | 'dashboard'
             }));
             setProjects(formattedProjects);
-            console.log('✅ Projects loaded from server');
           } else {
             const defaultData = migrationService.getDefaultData();
             setProjects(defaultData.projects || []);
-            console.log('✅ Projects loaded from defaults');
           }
         }
 
         // Load Skills from localStorage
         const savedSkills = localStorage.getItem('portfolio_skills');
+        
         if (savedSkills) {
           try {
             const skillsData = JSON.parse(savedSkills);
-            const skills = Array.isArray(skillsData.skills) ? skillsData.skills : [];
+            const skills = Array.isArray(skillsData) ? skillsData : (Array.isArray(skillsData.skills) ? skillsData.skills : []);
             setSkills(skills);
-            console.log('✅ Skills loaded from localStorage:', skills);
           } catch (error) {
             console.error('❌ Error parsing skills from localStorage:', error);
             // Load from server as fallback
@@ -164,11 +145,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
             if (skillsResult.success && skillsResult.data) {
               const skills = Array.isArray(skillsResult.data) ? skillsResult.data : (skillsResult.data as any).skills || [];
               setSkills(skills);
-              console.log('✅ Skills loaded from server (fallback)');
             } else {
-              const defaultData = migrationService.getDefaultData();
-              setSkills(defaultData.skills || []);
-              console.log('✅ Skills loaded from defaults');
+              setSkills([]);
             }
           }
         } else {
@@ -177,11 +155,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           if (skillsResult.success && skillsResult.data) {
             const skills = Array.isArray(skillsResult.data) ? skillsResult.data : (skillsResult.data as any).skills || [];
             setSkills(skills);
-            console.log('✅ Skills loaded from server');
           } else {
-            const defaultData = migrationService.getDefaultData();
-            setSkills(defaultData.skills || []);
-            console.log('✅ Skills loaded from defaults');
+            setSkills([]);
           }
         }
 
@@ -218,7 +193,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               };
             });
             setExperiences(updatedExperiences);
-            console.log('✅ Experiences loaded from localStorage');
           } catch (error) {
             console.error('❌ Error parsing experiences from localStorage:', error);
             // Load from server as fallback
@@ -249,11 +223,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
                 };
               });
               setExperiences(updatedExperiences);
-              console.log('✅ Experiences loaded from server (fallback)');
             } else {
               const defaultData = migrationService.getDefaultData();
               setExperiences(defaultData.experiences || []);
-              console.log('✅ Experiences loaded from defaults');
             }
           }
         } else {
@@ -287,15 +259,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
               };
             });
             setExperiences(updatedExperiences);
-            console.log('✅ Experiences loaded from server');
           } else {
             const defaultData = migrationService.getDefaultData();
             setExperiences(defaultData.experiences || []);
-            console.log('✅ Experiences loaded from defaults');
           }
         }
 
-        console.log('🎉 All data loaded successfully!');
       } catch (error) {
         console.error('💥 Critical error loading data:', error);
         // Clear localStorage if there are persistent errors
@@ -313,7 +282,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   // Listen for custom events from offline editor
   useEffect(() => {
     const handlePortfolioDataUpdate = (e: CustomEvent) => {
-      console.log('🔄 Portfolio data updated from offline editor, reloading...');
       // Reload data when offline editor saves changes
       window.location.reload();
     };
@@ -333,7 +301,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // Update localStorage
     localStorage.setItem('portfolio_projects', JSON.stringify({ projects: updatedProjects }));
     
-    // Update server
+    
+    // Update server (fallback)
     await dataService.updateProjectsWithFallback(updatedProjects);
   };
 
@@ -344,7 +313,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // Update localStorage
     localStorage.setItem('portfolio_projects', JSON.stringify({ projects: updatedProjects }));
     
-    // Update server
+    
+    // Update server (fallback)
     await dataService.updateProjectsWithFallback(updatedProjects);
   };
 
@@ -364,33 +334,87 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     const updatedExperiences = [...experiences, newExperience];
     setExperiences(updatedExperiences);
     
-    // Update localStorage
-    localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
-    
-    // Update server
-    await dataService.updateExperiencesWithFallback(updatedExperiences);
+    // Update JSON files directly
+    try {
+      const response = await fetch('/api/save-data.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'experiences',
+          data: updatedExperiences
+        })
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to save experiences to server, data saved locally only');
+        // Fallback to localStorage
+        localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+      }
+    } catch (error) {
+      console.warn('Failed to save experiences to server, data saved locally only');
+      // Fallback to localStorage
+      localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+    }
   };
 
   const updateExperience = async (id: number, experience: Partial<Experience>) => {
     const updatedExperiences = experiences.map(e => e.id === id ? { ...e, ...experience } : e);
     setExperiences(updatedExperiences);
     
-    // Update localStorage
-    localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
-    
-    // Update server
-    await dataService.updateExperiencesWithFallback(updatedExperiences);
+    // Update JSON files directly
+    try {
+      const response = await fetch('/api/save-data.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'experiences',
+          data: updatedExperiences
+        })
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to save experiences to server, data saved locally only');
+        // Fallback to localStorage
+        localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+      }
+    } catch (error) {
+      console.warn('Failed to save experiences to server, data saved locally only');
+      // Fallback to localStorage
+      localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+    }
   };
 
   const deleteExperience = async (id: number) => {
     const updatedExperiences = experiences.filter(e => e.id !== id);
     setExperiences(updatedExperiences);
     
-    // Update localStorage
-    localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
-    
-    // Update server
-    await dataService.updateExperiencesWithFallback(updatedExperiences);
+    // Update JSON files directly
+    try {
+      const response = await fetch('/api/save-data.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'experiences',
+          data: updatedExperiences
+        })
+      });
+      
+      if (!response.ok) {
+        console.warn('Failed to save experiences to server, data saved locally only');
+        // Fallback to localStorage
+        localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+      }
+    } catch (error) {
+      console.warn('Failed to save experiences to server, data saved locally only');
+      // Fallback to localStorage
+      localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+    }
   };
 
   const addSkill = async (skill: Skill) => {
@@ -400,7 +424,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // Update localStorage
     localStorage.setItem('portfolio_skills', JSON.stringify({ skills: updatedSkills }));
     
-    // Update server
+    // Update server (fallback)
     await dataService.updateSkillsWithFallback(updatedSkills);
   };
 
@@ -411,7 +435,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // Update localStorage
     localStorage.setItem('portfolio_skills', JSON.stringify({ skills: updatedSkills }));
     
-    // Update server
+    // Update server (fallback)
     await dataService.updateSkillsWithFallback(updatedSkills);
   };
 
@@ -433,7 +457,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     // Update localStorage
     localStorage.setItem('portfolio_profile', JSON.stringify({ profile: updatedProfile }));
     
-    // Update server
+    // Update server (fallback)
     await dataService.updateProfileWithFallback(updatedProfile);
   };
 
@@ -480,7 +504,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     const defaultData = migrationService.getDefaultData();
     setProfile(defaultData.profile);
     setProjects(defaultData.projects || []);
-    setSkills(defaultData.skills || []);
+    setSkills([]);
     setExperiences(defaultData.experiences || []);
     
     // Clear localStorage

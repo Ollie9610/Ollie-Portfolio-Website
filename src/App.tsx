@@ -1,3 +1,6 @@
+// Disable ResizeObserver to prevent errors
+import './utils/disableResizeObserver';
+
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { AnimatePresence } from 'framer-motion';
@@ -12,23 +15,8 @@ import ProjectModal from './components/ProjectModal';
 import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
 import LiquidBackground from './components/LiquidBackground';
-import ResizeObserverErrorBoundary from './components/ResizeObserverErrorBoundary';
 import { Project } from './types';
 
-// Simple ResizeObserver error suppression
-const suppressResizeObserverErrors = () => {
-  const originalError = console.error;
-  console.error = (...args) => {
-    const message = args[0];
-    if (typeof message === 'string' && message.includes('ResizeObserver loop completed with undelivered notifications')) {
-      return;
-    }
-    originalError.apply(console, args);
-  };
-};
-
-// Run once on load
-suppressResizeObserverErrors();
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -118,21 +106,13 @@ const App: React.FC = () => {
 
   if (isAdminRoute) {
     if (isAuthenticated) {
-      return (
-        <ResizeObserverErrorBoundary>
-          <AdminDashboard />
-        </ResizeObserverErrorBoundary>
-      );
+      return <AdminDashboard />;
     } else {
       return <Login />;
     }
   }
 
-  return (
-    <ResizeObserverErrorBoundary>
-      <PortfolioApp />
-    </ResizeObserverErrorBoundary>
-  );
+  return <PortfolioApp />;
 };
 
 const AppWithProviders: React.FC = () => {
