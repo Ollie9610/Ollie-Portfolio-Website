@@ -29,13 +29,10 @@ class MigrationService {
               twitter: data.profile.twitter || '',
               // Ensure all required fields exist
               name: data.profile.name || 'Your Name',
-              title: data.profile.title || 'Professional',
               bio: data.profile.bio || 'Add your bio here',
-              greeting: data.profile.greeting || "Hi, I'm",
               roles: data.profile.roles || 'Professional',
               location: data.profile.location || 'Your Location',
               email: data.profile.email || 'your.email@example.com',
-              phone: data.profile.phone || '',
               profileImage: data.profile.profileImage || '/api/placeholder/300/300',
               linkedin: data.profile.linkedin || ''
             }
@@ -63,6 +60,30 @@ class MigrationService {
           ...data,
           awards: data.awards || []
         };
+      }
+    },
+    {
+      version: '1.4.0',
+      description: 'Remove title field and update profile structure',
+      migrate: (data) => {
+        if (data.profile) {
+          const { title, ...profileWithoutTitle } = data.profile;
+          return {
+            ...data,
+            profile: {
+              ...profileWithoutTitle,
+              // Ensure all required fields exist with proper defaults
+              name: data.profile.name || 'Your Name',
+              location: data.profile.location || 'Your City, Country',
+              email: data.profile.email || 'your.email@example.com',
+              profileImage: data.profile.profileImage || '/api/placeholder/300/300',
+              bio: data.profile.bio || 'Add your bio here',
+              roles: data.profile.roles || 'Professional',
+              linkedin: data.profile.linkedin || ''
+            }
+          };
+        }
+        return data;
       }
     }
   ];
@@ -127,13 +148,10 @@ class MigrationService {
       version: this.getCurrentVersion(),
       profile: {
         name: 'Your Name',
-        title: 'Data Analyst & BI Developer',
         location: 'Your City, Country',
         email: 'your.email@example.com',
-        phone: '+1 (555) 123-4567',
         profileImage: '/api/placeholder/300/300',
         bio: 'I transform raw data into strategic insights that drive business growth.',
-        greeting: "Hi, I'm",
         roles: 'Data Analyst\nBI Developer\nProcess Optimisation Expert',
         linkedin: 'https://linkedin.com/in/your-profile',
         website: '',
@@ -150,3 +168,5 @@ class MigrationService {
 }
 
 export const migrationService = new MigrationService();
+
+

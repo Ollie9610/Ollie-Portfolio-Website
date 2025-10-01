@@ -44,13 +44,20 @@ npm start
 
 The React app will be available at `http://localhost:3000`
 
-### 3. Access the Admin Panel
+### 3. Build for Production
+
+```bash
+npm run build
+```
+
+### 4. Access the Admin Panel
 
 1. Visit `http://localhost:3000/admin`
 2. Login with:
    - Username: `admin`
    - Password: `portfolio2024`
 3. Manage your content through the intuitive dashboard
+4. Export your data before deploying
 
 ## 📁 Project Structure
 

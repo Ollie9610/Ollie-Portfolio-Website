@@ -1,673 +1,537 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaPlus, FaEdit, FaTrash, FaBriefcase, FaGraduationCap, FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import { useData } from '../contexts/DataContext';
 
-const EditorContainer = styled.div`
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 15px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
-const EditorTitle = styled.h3`
-  color: #40e0ff;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+const Header = styled.div`
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
+  margin-bottom: 30px;
 `;
 
-const FormGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-`;
-
-const FormGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Label = styled.label`
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const Input = styled.input`
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  padding: 0.75rem;
+const Title = styled.h2`
   color: white;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #40e0ff;
-    box-shadow: 0 0 10px rgba(64, 224, 255, 0.3);
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-  }
+  margin: 0;
 `;
 
-const Select = styled.select`
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  padding: 0.75rem;
-  color: white;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #40e0ff;
-    box-shadow: 0 0 10px rgba(64, 224, 255, 0.3);
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  option {
-    background: #1a1a1a;
-    color: white;
-  }
-`;
-
-const TextArea = styled.textarea`
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  padding: 0.75rem;
-  color: white;
-  font-size: 0.9rem;
-  min-height: 100px;
-  resize: vertical;
-  font-family: inherit;
-  transition: all 0.3s ease;
-
-  &:focus {
-    outline: none;
-    border-color: #40e0ff;
-    box-shadow: 0 0 10px rgba(64, 224, 255, 0.3);
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-  }
-`;
-
-const AchievementList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`;
-
-const AchievementItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-`;
-
-const AchievementInput = styled(Input)`
-  flex: 1;
-`;
-
-const TechnologyList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-`;
-
-const TechnologyTag = styled.span`
-  background: rgba(64, 224, 255, 0.2);
-  color: #40e0ff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  border: 1px solid rgba(64, 224, 255, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const TechnologyInput = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-`;
-
-const Button = styled.button<{ $variant?: 'primary' | 'secondary' | 'danger' }>`
-  padding: 0.75rem 1.5rem;
+const AddButton = styled.button`
+  padding: 10px 20px;
+  background: linear-gradient(45deg, #4caf50, #45a049);
   border: none;
   border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  color: white;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  ${props => {
-    switch (props.$variant) {
-      case 'primary':
-        return `
-          background: linear-gradient(135deg, #40e0ff, #64c8ff);
-          color: white;
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(64, 224, 255, 0.4);
-          }
-        `;
-      case 'danger':
-        return `
-          background: linear-gradient(135deg, #ff4757, #ff6b7a);
-          color: white;
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
-          }
-        `;
-      default:
-        return `
-          background: rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          &:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-          }
-        `;
-    }
-  }}
-`;
-
-const SmallButton = styled.button`
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 6px;
-  padding: 0.5rem;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
-
+  
   &:hover {
-    background: rgba(255, 71, 87, 0.3);
-    border-color: #ff4757;
-    color: #ff4757;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
 `;
 
 const ExperienceList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 20px;
+  margin-bottom: 30px;
 `;
 
-const ExperienceCard = styled.div<{ $type: 'job' | 'education' }>`
-  background: ${props => props.$type === 'job' 
-    ? 'linear-gradient(135deg, rgba(64, 224, 255, 0.1) 0%, rgba(100, 200, 255, 0.05) 100%)'
-    : 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%)'
-  };
-  border: 1px solid ${props => props.$type === 'job' 
-    ? 'rgba(64, 224, 255, 0.3)'
-    : 'rgba(255, 215, 0, 0.3)'
-  };
+const ExperienceCard = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  padding: 1.5rem;
-  position: relative;
+  padding: 20px;
+  backdrop-filter: blur(10px);
 `;
 
 const ExperienceHeader = styled.div`
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
 `;
 
-const ExperienceIcon = styled.div<{ $type: 'job' | 'education' }>`
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: ${props => props.$type === 'job' 
-    ? 'linear-gradient(135deg, rgba(64, 224, 255, 0.2), rgba(100, 200, 255, 0.1))'
-    : 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 193, 7, 0.1))'
-  };
-  border: 1px solid ${props => props.$type === 'job' 
-    ? 'rgba(64, 224, 255, 0.3)'
-    : 'rgba(255, 215, 0, 0.3)'
-  };
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${props => props.$type === 'job' ? '#40e0ff' : '#ffd700'};
-  font-size: 1rem;
-  flex-shrink: 0;
-`;
-
-const ExperienceDetails = styled.div`
-  flex: 1;
-`;
-
-const ExperienceTitle = styled.h4`
+const ExperienceTitle = styled.h3`
   color: white;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 0.25rem 0;
-`;
-
-const ExperienceCompany = styled.p`
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  margin: 0 0 0.5rem 0;
-`;
-
-const ExperienceMeta = styled.div`
-  display: flex;
-  gap: 1rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8rem;
-  margin-bottom: 0.75rem;
+  margin: 0;
+  font-size: 1.2rem;
+  flex: 1;
 `;
 
 const ExperienceActions = styled.div`
   display: flex;
-  gap: 0.5rem;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  gap: 10px;
+`;
+
+const ActionButton = styled.button<{ variant?: 'edit' | 'delete' }>`
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  ${props => props.variant === 'edit' ? `
+    background: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+    border: 1px solid rgba(33, 150, 243, 0.3);
+    
+    &:hover {
+      background: rgba(33, 150, 243, 0.3);
+    }
+  ` : `
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    
+    &:hover {
+      background: rgba(244, 67, 54, 0.3);
+    }
+  `}
+`;
+
+const ExperienceMeta = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  flex-wrap: wrap;
+`;
+
+const ExperienceDescription = styled.p`
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.5;
+`;
+
+const Form = styled.form`
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 15px;
+`;
+
+const Label = styled.label`
+  display: block;
+  color: white;
+  margin-bottom: 8px;
+  font-weight: 500;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+  
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  option {
+    background: #333;
+    color: white;
+  }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 10px;
+  justify-content: flex-end;
+`;
+
+const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  
+  ${props => props.variant === 'primary' ? `
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+  ` : `
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  `}
 `;
 
 const ExperienceEditor: React.FC = () => {
   const { experiences, addExperience, updateExperience, deleteExperience } = useData();
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingExperience, setEditingExperience] = useState<number | null>(null);
   const [formData, setFormData] = useState({
-    type: 'job' as 'job' | 'education',
     title: '',
     company: '',
+    description: '',
+    type: 'job' as 'job' | 'education',
     startDate: '',
     endDate: '',
     location: '',
-    description: '',
-    achievements: [''],
-    technologies: [] as string[],
-    newTechnology: ''
+    duration: '',
+    achievements: [] as string[],
+    technologies: [] as string[]
   });
 
-  useEffect(() => {
-    if (editingId) {
-      const experience = experiences.find(exp => exp.id === editingId);
-      if (experience) {
-        setFormData({
-          type: experience.type,
-          title: experience.title,
-          company: experience.company,
-          startDate: experience.startDate,
-          endDate: experience.endDate || '',
-          location: experience.location,
-          description: experience.description,
-          achievements: experience.achievements.length > 0 ? experience.achievements : [''],
-          technologies: experience.technologies,
-          newTechnology: ''
-        });
-      }
-    }
-  }, [editingId, experiences]);
-
-  const resetForm = () => {
+  const handleAdd = () => {
+    setEditingExperience(-1);
     setFormData({
-      type: 'job',
       title: '',
       company: '',
+      description: '',
+      type: 'job',
       startDate: '',
       endDate: '',
       location: '',
-      description: '',
-      achievements: [''],
-      technologies: [],
-      newTechnology: ''
+      duration: '',
+      achievements: [],
+      technologies: []
     });
-    setIsAdding(false);
-    setEditingId(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleEdit = (index: number) => {
+    setEditingExperience(index);
+    setFormData({
+      title: experiences[index].title,
+      company: experiences[index].company,
+      description: experiences[index].description,
+      type: experiences[index].type,
+      startDate: experiences[index].startDate,
+      endDate: experiences[index].endDate || '',
+      location: experiences[index].location,
+      duration: experiences[index].duration,
+      achievements: experiences[index].achievements || [],
+      technologies: experiences[index].technologies || []
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const experienceData = {
-      type: formData.type,
-      title: formData.title,
-      company: formData.company,
-      startDate: formData.startDate,
-      endDate: formData.endDate || null,
-      location: formData.location,
-      description: formData.description,
-      achievements: formData.achievements.filter(achievement => achievement.trim() !== ''),
-      technologies: formData.technologies
-    };
-
-    if (editingId) {
-      updateExperience(editingId, experienceData);
-    } else {
-      addExperience(experienceData);
-    }
-    
-    resetForm();
-  };
-
-  const handleAddAchievement = () => {
-    setFormData(prev => ({
-      ...prev,
-      achievements: [...prev.achievements, '']
-    }));
-  };
-
-  const handleUpdateAchievement = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      achievements: prev.achievements.map((achievement, i) => 
-        i === index ? value : achievement
-      )
-    }));
-  };
-
-  const handleRemoveAchievement = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      achievements: prev.achievements.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAddTechnology = () => {
-    if (formData.newTechnology.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        technologies: [...prev.technologies, prev.newTechnology.trim()],
-        newTechnology: ''
-      }));
+    try {
+      if (editingExperience === -1) {
+        await addExperience(formData);
+      } else if (editingExperience !== null) {
+        await updateExperience(editingExperience, formData);
+      }
+      setEditingExperience(null);
+      setFormData({
+        title: '',
+        company: '',
+        description: '',
+        type: 'job',
+        startDate: '',
+        endDate: '',
+        location: '',
+        duration: '',
+        achievements: [],
+        technologies: []
+      });
+    } catch (error) {
+      console.error('Error saving experience:', error);
     }
   };
 
-  const handleRemoveTechnology = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      technologies: prev.technologies.filter((_, i) => i !== index)
-    }));
-  };
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString + '-01');
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long' 
+  const handleCancel = () => {
+    setEditingExperience(null);
+    setFormData({
+      title: '',
+      company: '',
+      description: '',
+      type: 'job',
+      startDate: '',
+      endDate: '',
+      location: '',
+      duration: '',
+      achievements: [],
+      technologies: []
     });
   };
 
-  const formatDuration = (startDate: string, endDate: string | null): string => {
-    const start = formatDate(startDate);
-    const end = endDate ? formatDate(endDate) : 'Present';
-    return `${start} - ${end}`;
+  const handleDelete = async (index: number) => {
+    if (window.confirm('Are you sure you want to delete this experience?')) {
+      try {
+        await deleteExperience(index);
+      } catch (error) {
+        console.error('Error deleting experience:', error);
+      }
+    }
   };
 
   return (
-    <EditorContainer>
-      <EditorTitle>
-        {isAdding || editingId ? (
-          editingId ? (
-            <>
-              <FaEdit /> Edit Experience
-            </>
-          ) : (
-            <>
-              <FaPlus /> Add New Experience
-            </>
-          )
-        ) : (
-          <>
-            <FaBriefcase /> Experience Management
-          </>
-        )}
-      </EditorTitle>
+    <Container>
+      <Header>
+        <Title>Experience Management</Title>
+        <AddButton onClick={handleAdd}>
+          Add Experience
+        </AddButton>
+      </Header>
 
-      {isAdding || editingId ? (
-        <form onSubmit={handleSubmit}>
-          <FormGrid>
-            <FormGroup>
-              <Label>
-                <FaBriefcase /> Type
-              </Label>
-              <Select
-                value={formData.type}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  type: e.target.value as 'job' | 'education' 
-                }))}
-                required
-              >
-                <option value="job">Job</option>
-                <option value="education">Education</option>
-              </Select>
-            </FormGroup>
+      <ExperienceList>
+        {experiences.map((experience, index) => (
+          <ExperienceCard key={experience.id}>
+            <ExperienceHeader>
+              <ExperienceTitle>{experience.title}</ExperienceTitle>
+              <ExperienceActions>
+                <ActionButton variant="edit" onClick={() => handleEdit(index)}>
+                  Edit
+                </ActionButton>
+                <ActionButton variant="delete" onClick={() => handleDelete(index)}>
+                  Delete
+                </ActionButton>
+              </ExperienceActions>
+            </ExperienceHeader>
+            <ExperienceMeta>
+              <span>{experience.company}</span>
+              <span>{experience.type}</span>
+              <span>{experience.duration}</span>
+              <span>{experience.location}</span>
+            </ExperienceMeta>
+            <ExperienceDescription>{experience.description}</ExperienceDescription>
+            {experience.achievements && experience.achievements.length > 0 && (
+              <div style={{ marginTop: '10px' }}>
+                <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '5px' }}>
+                  <strong>Achievements:</strong>
+                </div>
+                <ul style={{ color: 'rgba(255, 255, 255, 0.9)', margin: 0, paddingLeft: '20px' }}>
+                  {experience.achievements.map((achievement, i) => (
+                    <li key={i}>{achievement}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {experience.technologies && experience.technologies.length > 0 && (
+              <div style={{ marginTop: '10px' }}>
+                <div style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', marginBottom: '5px' }}>
+                  <strong>Technologies:</strong>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {experience.technologies.map((tech, i) => (
+                    <span key={i} style={{
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </ExperienceCard>
+        ))}
+      </ExperienceList>
 
-            <FormGroup>
-              <Label>
-                {formData.type === 'job' ? <FaBriefcase /> : <FaGraduationCap />}
-                {formData.type === 'job' ? 'Job Title' : 'Degree/Program'}
-              </Label>
-              <Input
-                type="text"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder={formData.type === 'job' ? 'e.g., Senior Data Analyst' : 'e.g., Master of Science in Data Science'}
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>
-                {formData.type === 'job' ? 'Company' : 'Institution'}
-              </Label>
-              <Input
-                type="text"
-                value={formData.company}
-                onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
-                placeholder={formData.type === 'job' ? 'e.g., TechCorp Solutions' : 'e.g., University of California, Berkeley'}
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>
-                <FaCalendarAlt /> Start Date
-              </Label>
-              <Input
-                type="month"
-                value={formData.startDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                required
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>
-                <FaCalendarAlt /> End Date
-              </Label>
-              <Input
-                type="month"
-                value={formData.endDate}
-                onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                placeholder="Leave empty for current/ongoing"
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <Label>
-                <FaMapMarkerAlt /> Location
-              </Label>
-              <Input
-                type="text"
-                value={formData.location}
-                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="e.g., San Francisco, CA"
-                required
-              />
-            </FormGroup>
-          </FormGrid>
-
+      {editingExperience !== null && (
+        <Form onSubmit={handleSubmit}>
+          <h3 style={{ color: 'white', marginBottom: '20px' }}>
+            {editingExperience === -1 ? 'Add New Experience' : 'Edit Experience'}
+          </h3>
+          
           <FormGroup>
-            <Label>Description</Label>
-            <TextArea
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Describe your role, responsibilities, and key contributions..."
+            <Label htmlFor="title">Title/Position</Label>
+            <Input
+              type="text"
+              id="title"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="e.g., Software Developer, Data Analyst"
               required
             />
           </FormGroup>
 
           <FormGroup>
-            <Label>Achievements</Label>
-            <AchievementList>
-              {formData.achievements.map((achievement, index) => (
-                <AchievementItem key={index}>
-                  <AchievementInput
-                    type="text"
-                    value={achievement}
-                    onChange={(e) => handleUpdateAchievement(index, e.target.value)}
-                    placeholder="Enter an achievement..."
-                  />
-                  <SmallButton
-                    type="button"
-                    onClick={() => handleRemoveAchievement(index)}
-                    disabled={formData.achievements.length === 1}
-                  >
-                    <FaTrash />
-                  </SmallButton>
-                </AchievementItem>
-              ))}
-            </AchievementList>
-            <Button 
-              type="button" 
-              onClick={handleAddAchievement}
-              style={{ marginTop: '0.5rem' }}
-            >
-              <FaPlus /> Add Achievement
-            </Button>
+            <Label htmlFor="company">Company/Institution</Label>
+            <Input
+              type="text"
+              id="company"
+              value={formData.company}
+              onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+              placeholder="e.g., Google, University of Manchester"
+              required
+            />
           </FormGroup>
 
           <FormGroup>
-            <Label>Technologies</Label>
-            <TechnologyList>
-              {formData.technologies.map((tech, index) => (
-                <TechnologyTag key={index}>
-                  {tech}
-                  <SmallButton
-                    type="button"
-                    onClick={() => handleRemoveTechnology(index)}
-                  >
-                    <FaTrash />
-                  </SmallButton>
-                </TechnologyTag>
-              ))}
-            </TechnologyList>
-            <TechnologyInput>
-              <Input
-                type="text"
-                value={formData.newTechnology}
-                onChange={(e) => setFormData(prev => ({ ...prev, newTechnology: e.target.value }))}
-                placeholder="Add a technology..."
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTechnology())}
-              />
-              <Button type="button" onClick={handleAddTechnology}>
-                <FaPlus /> Add
-              </Button>
-            </TechnologyInput>
+            <Label htmlFor="type">Type</Label>
+            <Select
+              id="type"
+              value={formData.type}
+              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as 'job' | 'education' }))}
+            >
+              <option value="job">Job</option>
+              <option value="education">Education</option>
+            </Select>
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="description">Description</Label>
+            <TextArea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Describe your role and achievements..."
+              rows={3}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="startDate">Start Date</Label>
+            <Input
+              type="month"
+              id="startDate"
+              value={formData.startDate}
+              onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="endDate">End Date (leave empty if current)</Label>
+            <Input
+              type="month"
+              id="endDate"
+              value={formData.endDate}
+              onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              type="text"
+              id="location"
+              value={formData.location}
+              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+              placeholder="e.g., Manchester, UK"
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="duration">Duration (display text)</Label>
+            <Input
+              type="text"
+              id="duration"
+              value={formData.duration}
+              onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+              placeholder="e.g., 2020 - Present, 2 years"
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="achievements">Achievements (comma-separated)</Label>
+            <Input
+              type="text"
+              id="achievements"
+              value={formData.achievements.join(', ')}
+              onChange={(e) => {
+                const achievements = e.target.value.split(',').map(a => a.trim()).filter(a => a);
+                setFormData(prev => ({ ...prev, achievements }));
+              }}
+              placeholder="e.g., Increased efficiency by 30%, Led team of 5 developers"
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="technologies">Technologies (comma-separated)</Label>
+            <Input
+              type="text"
+              id="technologies"
+              value={formData.technologies.join(', ')}
+              onChange={(e) => {
+                const technologies = e.target.value.split(',').map(t => t.trim()).filter(t => t);
+                setFormData(prev => ({ ...prev, technologies }));
+              }}
+              placeholder="e.g., React, Node.js, Python, SQL"
+            />
           </FormGroup>
 
           <ButtonGroup>
-            <Button type="submit" $variant="primary">
-              {editingId ? 'Update Experience' : 'Add Experience'}
-            </Button>
-            <Button type="button" onClick={resetForm}>
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancel
             </Button>
+            <Button type="submit" variant="primary">
+              {editingExperience === -1 ? 'Add Experience' : 'Update Experience'}
+            </Button>
           </ButtonGroup>
-        </form>
-      ) : (
-        <>
-          <Button onClick={() => setIsAdding(true)} $variant="primary">
-            <FaPlus /> Add New Experience
-          </Button>
-
-          <ExperienceList>
-            {experiences.map((experience) => (
-              <ExperienceCard key={experience.id} $type={experience.type}>
-                <ExperienceHeader>
-                  <ExperienceIcon $type={experience.type}>
-                    {experience.type === 'job' ? <FaBriefcase /> : <FaGraduationCap />}
-                  </ExperienceIcon>
-                  
-                  <ExperienceDetails>
-                    <ExperienceTitle>{experience.title}</ExperienceTitle>
-                    <ExperienceCompany>{experience.company}</ExperienceCompany>
-                    <ExperienceMeta>
-                      <span>{formatDuration(experience.startDate, experience.endDate)}</span>
-                      <span>•</span>
-                      <span>{experience.location}</span>
-                    </ExperienceMeta>
-                  </ExperienceDetails>
-
-                  <ExperienceActions>
-                    <Button
-                      onClick={() => setEditingId(experience.id)}
-                      style={{ padding: '0.5rem' }}
-                    >
-                      <FaEdit />
-                    </Button>
-                    <Button
-                      onClick={() => deleteExperience(experience.id)}
-                      $variant="danger"
-                      style={{ padding: '0.5rem' }}
-                    >
-                      <FaTrash />
-                    </Button>
-                  </ExperienceActions>
-                </ExperienceHeader>
-              </ExperienceCard>
-            ))}
-          </ExperienceList>
-        </>
+        </Form>
       )}
-    </EditorContainer>
+    </Container>
   );
 };
 

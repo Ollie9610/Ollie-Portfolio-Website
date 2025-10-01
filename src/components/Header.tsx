@@ -299,21 +299,6 @@ const Header: React.FC = () => {
                 )}
               </NavLink>
             ))}
-            <NavLink
-              $isActive={false}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => window.open('/admin', '_blank')}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 0.3, 
-                delay: sections.length * 0.1,
-                ease: "easeOut"
-              }}
-            >
-              Admin
-            </NavLink>
           </NavLinks>
         </Nav>
 
@@ -344,21 +329,6 @@ const Header: React.FC = () => {
               {section.name}
             </NavLink>
           ))}
-          <NavLink
-            $isActive={false}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => window.open('/admin', '_blank')}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.3, 
-              delay: sections.length * 0.1,
-              ease: "easeOut"
-            }}
-          >
-            Admin
-          </NavLink>
         </MobileNavLinks>
 
         <MobileMenuButton 

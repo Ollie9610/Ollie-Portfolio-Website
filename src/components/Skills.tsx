@@ -237,9 +237,9 @@ const SkillsList = styled.div`
   gap: 1rem;
 `;
 
-const SkillItem = styled(motion.div)<{ category: string; proficiency: number }>`
+const SkillItem = styled(motion.div)<{ category: string; dots: number }>`
   background: ${props => {
-    if (props.proficiency >= 90) {
+    if (props.dots === 3) {
       // 3-dot skills get gradient background
       switch (props.category) {
         case 'Programming & Query Languages': return 'linear-gradient(135deg, rgba(25, 118, 210, 0.2), rgba(66, 165, 245, 0.1))';
@@ -270,7 +270,7 @@ const SkillItem = styled(motion.div)<{ category: string; proficiency: number }>`
     })();
     
     // 3-dot skills get prominent outline
-    if (props.proficiency >= 90) {
+    if (props.dots === 3) {
       switch (props.category) {
         case 'Programming & Query Languages': return '2px solid #1976d2';
         case 'Analytics & Data Platforms': return '2px solid #7b1fa2';
@@ -285,11 +285,11 @@ const SkillItem = styled(motion.div)<{ category: string; proficiency: number }>`
   padding: 0.75rem 1.5rem;
   color: white;
   font-size: 1rem;
-  font-weight: ${props => props.proficiency >= 90 ? '600' : '500'};
+  font-weight: ${props => props.dots === 3 ? '600' : '500'};
   transition: all 0.3s ease;
   position: relative;
-  box-shadow: ${props => props.proficiency >= 90 ? '0 0 8px rgba(255, 215, 0, 0.8)' : 'none'};
-  z-index: ${props => props.proficiency >= 90 ? '2' : '1'};
+  box-shadow: ${props => props.dots === 3 ? '0 0 8px rgba(255, 215, 0, 0.8)' : 'none'};
+  z-index: ${props => props.dots === 3 ? '2' : '1'};
 
   &::before {
     content: '';
@@ -298,7 +298,7 @@ const SkillItem = styled(motion.div)<{ category: string; proficiency: number }>`
     left: 0;
     right: 0;
     bottom: 0;
-    background: ${props => props.proficiency >= 90 ? (() => {
+    background: ${props => props.dots === 3 ? (() => {
       switch (props.category) {
         case 'Programming & Query Languages': return 'linear-gradient(135deg, rgba(25, 118, 210, 0.1), transparent)';
         case 'Analytics & Data Platforms': return 'linear-gradient(135deg, rgba(123, 31, 162, 0.1), transparent)';
@@ -308,13 +308,13 @@ const SkillItem = styled(motion.div)<{ category: string; proficiency: number }>`
       }
     })() : 'transparent'};
     border-radius: 30px;
-    opacity: ${props => props.proficiency >= 90 ? 1 : 0};
+    opacity: ${props => props.dots === 3 ? 1 : 0};
     transition: opacity 0.3s ease;
   }
 
   &:hover {
     background: ${props => {
-      if (props.proficiency >= 90) {
+      if (props.dots === 3) {
         // Enhanced hover for 3-dot skills
         switch (props.category) {
           case 'Programming & Query Languages': return 'linear-gradient(135deg, rgba(25, 118, 210, 0.3), rgba(66, 165, 245, 0.2))';
@@ -343,7 +343,7 @@ const SkillItem = styled(motion.div)<{ category: string; proficiency: number }>`
       }
     }};
     transform: translateY(-2px);
-    box-shadow: ${props => props.proficiency >= 90 ? '0 4px 12px rgba(255, 215, 0, 0.9)' : '0 2px 10px rgba(0, 0, 0, 0.1)'};
+    box-shadow: ${props => props.dots === 3 ? '0 4px 12px rgba(255, 215, 0, 0.9)' : '0 2px 10px rgba(0, 0, 0, 0.1)'};
   }
 `;
 
@@ -407,10 +407,8 @@ const Skills: React.FC = () => {
   const categoryOrder = ['Programming & Query Languages', 'Analytics & Data Platforms', 'Application Development & Automation', 'Business Systems'];
 
   // Helper function to get proficiency dots (1-3 dots)
-  const getProficiencyDots = (level: number) => {
-    if (level >= 90) return 3;
-    if (level >= 60) return 2;
-    return 1;
+  const getProficiencyDots = (dots: number) => {
+    return dots; // Already 1-3 dots
   };
 
 
@@ -540,14 +538,14 @@ const Skills: React.FC = () => {
               </CategoryTitle>
             <SkillsList>
               {categorySkills
-                .sort((a, b) => b.level - a.level) // Sort by proficiency (highest first)
+                .sort((a, b) => b.dots - a.dots) // Sort by proficiency (highest first)
                 .map((skill, skillIndex) => {
-                  const dots = getProficiencyDots(skill.level);
+                  const dots = getProficiencyDots(skill.dots);
                   return (
                     <SkillItem
                       key={skill.name}
                       category={categoryName}
-                      proficiency={skill.level}
+                      dots={skill.dots}
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
                       transition={{ 
@@ -565,7 +563,7 @@ const Skills: React.FC = () => {
                               key={dotNumber}
                               filled={dotNumber <= dots}
                               category={categoryName}
-                              isExpert={skill.level >= 90}
+                              isExpert={skill.dots === 3}
                             />
                           ))}
                         </ProficiencyDots>

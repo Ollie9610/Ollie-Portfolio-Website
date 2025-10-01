@@ -10,66 +10,25 @@ import Projects from './components/Projects';
 import Experience from './components/Experience';
 import ProjectModal from './components/ProjectModal';
 import AdminDashboard from './components/AdminDashboard';
+import Login from './components/Login';
 import LiquidBackground from './components/LiquidBackground';
 import ResizeObserverErrorBoundary from './components/ResizeObserverErrorBoundary';
 import { Project } from './types';
 
-// Aggressive ResizeObserver error suppression
+// Simple ResizeObserver error suppression
 const suppressResizeObserverErrors = () => {
-  // Override console.error multiple times to catch all instances
-  const originalConsoleError = console.error;
+  const originalError = console.error;
   console.error = (...args) => {
     const message = args[0];
     if (typeof message === 'string' && message.includes('ResizeObserver loop completed with undelivered notifications')) {
       return;
     }
-    originalConsoleError.apply(console, args);
+    originalError.apply(console, args);
   };
-
-  // Override console.warn as well
-  const originalConsoleWarn = console.warn;
-  console.warn = (...args) => {
-    const message = args[0];
-    if (typeof message === 'string' && message.includes('ResizeObserver loop completed with undelivered notifications')) {
-      return;
-    }
-    originalConsoleWarn.apply(console, args);
-  };
-
-  // Override console.log as well
-  const originalConsoleLog = console.log;
-  console.log = (...args) => {
-    const message = args[0];
-    if (typeof message === 'string' && message.includes('ResizeObserver loop completed with undelivered notifications')) {
-      return;
-    }
-    originalConsoleLog.apply(console, args);
-  };
-
-  // Window error handlers
-  window.addEventListener('error', (e) => {
-    if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  }, true);
-
-  window.addEventListener('unhandledrejection', (e) => {
-    if (e.reason && e.reason.message && e.reason.message.includes('ResizeObserver loop completed with undelivered notifications')) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  }, true);
 };
 
-// Run immediately
+// Run once on load
 suppressResizeObserverErrors();
-
-// Run again after a short delay to catch any late-loading errors
-setTimeout(suppressResizeObserverErrors, 100);
-setTimeout(suppressResizeObserverErrors, 500);
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -122,6 +81,7 @@ const PortfolioApp: React.FC = () => {
         />
       </MainContent>
       
+      
       <AnimatePresence>
         {selectedProject && (
           <ProjectModal
@@ -135,10 +95,26 @@ const PortfolioApp: React.FC = () => {
 }
 
 const App: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   // Check if we're on the admin route
   const isAdminRoute = window.location.pathname === '/admin';
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        fontSize: '1.2rem'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   if (isAdminRoute) {
     if (isAuthenticated) {
@@ -148,17 +124,15 @@ const App: React.FC = () => {
         </ResizeObserverErrorBoundary>
       );
     } else {
-      // Import Login component dynamically to avoid unused import warning
-      const Login = React.lazy(() => import('./components/Login'));
-      return (
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Login />
-        </React.Suspense>
-      );
+      return <Login />;
     }
   }
 
-  return <PortfolioApp />;
+  return (
+    <ResizeObserverErrorBoundary>
+      <PortfolioApp />
+    </ResizeObserverErrorBoundary>
+  );
 };
 
 const AppWithProviders: React.FC = () => {

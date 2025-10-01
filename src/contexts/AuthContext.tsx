@@ -1,73 +1,51 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-}
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface AuthContextType {
-  user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
   isAuthenticated: boolean;
+  login: (password: string) => boolean;
+  logout: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
 interface AuthProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in (stored in localStorage)
-    const savedUser = localStorage.getItem('portfolio_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    // Check if user is already authenticated
+    const authStatus = sessionStorage.getItem('admin_authenticated');
+    if (authStatus === 'true') {
       setIsAuthenticated(true);
     }
+    setLoading(false);
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    // Simple authentication - in production, this would be more secure
-    if (username === 'admin' && password === 'portfolio2024') {
-      const userData: User = {
-        id: '1',
-        username: 'admin',
-        email: 'admin@portfolio.com'
-      };
-      
-      setUser(userData);
+  const login = (password: string): boolean => {
+    // Simple password check - in production, this would be more secure
+    if (password === 'admin123') {
       setIsAuthenticated(true);
-      localStorage.setItem('portfolio_user', JSON.stringify(userData));
+      sessionStorage.setItem('admin_authenticated', 'true');
       return true;
     }
     return false;
   };
 
   const logout = () => {
-    setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('portfolio_user');
+    sessionStorage.removeItem('admin_authenticated');
   };
 
   const value = {
-    user,
+    isAuthenticated,
     login,
     logout,
-    isAuthenticated
+    loading
   };
 
   return (
@@ -76,4 +54,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
 

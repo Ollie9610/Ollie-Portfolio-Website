@@ -1,38 +1,33 @@
 export interface Project {
   id: number;
   title: string;
+  briefDescription: string;
   description: string;
-  image: string;
   technologies: string[];
   category: 'project' | 'dashboard';
-  metrics: {
-    views: number;
-    impact: string;
-    duration: string;
-  };
-  details: {
-    challenge: string;
-    solution: string;
-    results: string;
-    technologies: string[];
-    features: string[];
-  };
+  keyResults: string;
 }
 
 export interface Skill {
   name: string;
-  level: number;
-  category: 'Technical' | 'Analytical' | 'Tools' | 'Soft Skills';
+  dots: number; // 1, 2, or 3 dots
+  category: 'Programming & Query Languages' | 'Analytics & Data Platforms' | 'Application Development & Automation' | 'Business Systems';
 }
 
 export interface Profile {
   name: string;
-  title: string;
+  title?: string;
   location: string;
   email: string;
-  phone: string;
+  phone?: string;
   profileImage: string;
   bio: string;
+  greeting?: string;
+  roles: string;
+  linkedin: string;
+  website?: string;
+  github?: string;
+  twitter?: string;
 }
 
 export interface Experience {
@@ -43,6 +38,10 @@ export interface Experience {
   description: string;
   achievements: string[];
   technologies: string[];
+  startDate: string;
+  endDate: string | null;
+  location: string;
+  type: 'job' | 'education';
 }
 
 export interface Stat {

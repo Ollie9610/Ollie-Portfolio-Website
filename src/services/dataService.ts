@@ -8,30 +8,22 @@ export interface DataServiceResponse<T> {
 }
 
 class DataService {
-  private baseUrl = '/api/data';
+  // For static hosting, we'll use localStorage as primary storage
+  // and fall back to default data if needed
 
-  // Generic fetch method
+  // Generic fetch method for loading JSON files
   private async fetchData<T>(endpoint: string, options?: RequestInit): Promise<DataServiceResponse<T>> {
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options?.headers,
-        },
-        ...options,
-      });
-
+      const response = await fetch(`/data${endpoint}.json`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error(`Error fetching ${endpoint}:`, error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+        error: `Failed to load ${endpoint}: ${error}` 
       };
     }
   }

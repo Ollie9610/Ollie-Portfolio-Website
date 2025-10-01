@@ -1,60 +1,25 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Project } from '../types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Profile, Project, Skill, Experience } from '../types';
 import { dataService } from '../services/dataService';
 import { migrationService } from '../services/migrationService';
 
-interface Experience {
-  id: number;
-  type: 'job' | 'education';
-  title: string;
-  company: string;
-  startDate: string; // YYYY-MM format
-  endDate: string | null; // YYYY-MM format, null for current/ongoing
-  location: string;
-  description: string;
-  achievements: string[];
-  technologies: string[];
-}
-
-interface Skill {
-  name: string;
-  level: number;
-  category: 'Programming & Query Languages' | 'Analytics & Data Platforms' | 'Application Development & Automation' | 'Business Systems';
-}
-
-interface Profile {
-  name: string;
-  title: string;
-  location: string;
-  email: string;
-  phone: string;
-  profileImage: string;
-  bio: string;
-  greeting: string;
-  roles: string;
-  linkedin: string;
-}
-
 interface DataContextType {
-  projects: Project[];
-  experiences: Experience[];
-  skills: Skill[];
   profile: Profile;
-  updateProjects: (projects: Project[]) => void;
-  updateExperiences: (experiences: Experience[]) => void;
-  updateSkills: (skills: Skill[]) => void;
-  updateProfile: (profile: Partial<Profile>) => void;
-  addProject: (project: Project) => void;
-  updateProject: (id: number, project: Project) => void;
+  projects: Project[];
+  skills: Skill[];
+  experiences: Experience[];
+  addProject: (project: Omit<Project, 'id'>) => void;
+  updateProject: (id: number, project: Partial<Project>) => void;
   deleteProject: (id: number) => void;
   addExperience: (experience: Omit<Experience, 'id'>) => void;
-  updateExperience: (id: number, experience: Omit<Experience, 'id'>) => void;
+  updateExperience: (id: number, experience: Partial<Experience>) => void;
   deleteExperience: (id: number) => void;
   addSkill: (skill: Skill) => void;
-  updateSkill: (name: string, skill: Skill) => void;
-  deleteSkill: (name: string) => void;
+  updateSkill: (index: number, skill: Partial<Skill>) => void;
+  deleteSkill: (index: number) => void;
+  updateProfile: (profile: Partial<Profile>) => void;
   exportData: () => void;
-  importData: (file: File) => Promise<boolean>;
+  importData: (data: any) => void;
   resetToDefaults: () => void;
 }
 
@@ -69,258 +34,467 @@ export const useData = () => {
 };
 
 interface DataProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [skills, setSkills] = useState<Skill[]>([]);
   const [profile, setProfile] = useState<Profile>({
     name: '',
     title: '',
-    location: '',
     email: '',
     phone: '',
-    profileImage: '',
+    location: '',
+    profileImage: '/api/placeholder/300/300',
     bio: '',
-    greeting: '',
-    roles: '',
+    greeting: 'Hi, I\'m',
+    roles: 'Data Analyst',
     linkedin: ''
   });
+  
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
 
   useEffect(() => {
-    // Load data from server files with localStorage fallback
+    // Load data from localStorage first (from offline editor), then fallback to server
     const loadData = async () => {
+        console.log('🔄 Loading portfolio data...');
+        console.log('🔍 Checking localStorage keys:', Object.keys(localStorage).filter(key => key.startsWith('portfolio_')));
+        console.log('🔍 localStorage profile:', localStorage.getItem('portfolio_profile'));
+        console.log('🔍 localStorage skills:', localStorage.getItem('portfolio_skills'));
+        console.log('🔍 localStorage projects:', localStorage.getItem('portfolio_projects'));
+        console.log('🔍 localStorage experiences:', localStorage.getItem('portfolio_experiences'));
+      
       try {
-        // Load profile data
-        const profileResult = await dataService.getProfileWithFallback();
-        if (profileResult.success && profileResult.data) {
-          // Migrate data to current version
-          const migratedData = migrationService.migrateData(profileResult.data);
-          setProfile(migratedData.profile || migratedData);
+        // Load Profile from localStorage
+        const savedProfile = localStorage.getItem('portfolio_profile');
+        if (savedProfile) {
+          try {
+            const profileData = JSON.parse(savedProfile);
+            setProfile(profileData.profile || profileData);
+            console.log('✅ Profile loaded from localStorage:', profileData.profile || profileData);
+          } catch (error) {
+            console.error('❌ Error parsing profile from localStorage:', error);
+            // Load from server as fallback
+            const profileResult = await dataService.getProfileWithFallback();
+            if (profileResult.success && profileResult.data) {
+              const migratedData = migrationService.migrateData(profileResult.data);
+              setProfile(migratedData.profile || migratedData);
+              console.log('✅ Profile loaded from server (fallback)');
+            } else {
+              const defaultData = migrationService.getDefaultData();
+              setProfile(defaultData.profile);
+              console.log('✅ Profile loaded from defaults');
+            }
+          }
         } else {
-          // Fallback to default data
-          const defaultData = migrationService.getDefaultData();
-          setProfile(defaultData.profile);
+          // No localStorage data, load from server
+          const profileResult = await dataService.getProfileWithFallback();
+          if (profileResult.success && profileResult.data) {
+            const migratedData = migrationService.migrateData(profileResult.data);
+            setProfile(migratedData.profile || migratedData);
+            console.log('✅ Profile loaded from server');
+          } else {
+            const defaultData = migrationService.getDefaultData();
+            setProfile(defaultData.profile);
+            console.log('✅ Profile loaded from defaults');
+          }
         }
 
-        // Load projects data
-        const projectsResult = await dataService.getProjectsWithFallback();
-        if (projectsResult.success && projectsResult.data) {
-          const projects = Array.isArray(projectsResult.data) 
-            ? projectsResult.data 
-            : (projectsResult.data as any).projects || [];
-          const formattedProjects = projects.map((project: any) => ({
-            ...project,
-            category: project.category as 'project' | 'dashboard'
-          }));
-          setProjects(formattedProjects);
+        // Load Projects from localStorage
+        const savedProjects = localStorage.getItem('portfolio_projects');
+        if (savedProjects) {
+          try {
+            const projectsData = JSON.parse(savedProjects);
+            const projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
+            const formattedProjects = projects.map((project: any) => ({
+              ...project,
+              category: project.category as 'project' | 'dashboard'
+            }));
+            setProjects(formattedProjects);
+            console.log('✅ Projects loaded from localStorage');
+          } catch (error) {
+            console.error('❌ Error parsing projects from localStorage:', error);
+            // Load from server as fallback
+            const projectsResult = await dataService.getProjectsWithFallback();
+            if (projectsResult.success && projectsResult.data) {
+              const projects = Array.isArray(projectsResult.data) ? projectsResult.data : (projectsResult.data as any).projects || [];
+              const formattedProjects = projects.map((project: any) => ({
+                ...project,
+                category: project.category as 'project' | 'dashboard'
+              }));
+              setProjects(formattedProjects);
+              console.log('✅ Projects loaded from server (fallback)');
+            } else {
+              const defaultData = migrationService.getDefaultData();
+              setProjects(defaultData.projects || []);
+              console.log('✅ Projects loaded from defaults');
+            }
+          }
         } else {
-          // Fallback to default data
-          const defaultData = migrationService.getDefaultData();
-          setProjects(defaultData.projects || []);
+          // No localStorage data, load from server
+          const projectsResult = await dataService.getProjectsWithFallback();
+          if (projectsResult.success && projectsResult.data) {
+            const projects = Array.isArray(projectsResult.data) ? projectsResult.data : (projectsResult.data as any).projects || [];
+            const formattedProjects = projects.map((project: any) => ({
+              ...project,
+              category: project.category as 'project' | 'dashboard'
+            }));
+            setProjects(formattedProjects);
+            console.log('✅ Projects loaded from server');
+          } else {
+            const defaultData = migrationService.getDefaultData();
+            setProjects(defaultData.projects || []);
+            console.log('✅ Projects loaded from defaults');
+          }
         }
 
-        // Load experiences data
-        const experiencesResult = await dataService.getExperiencesWithFallback();
-        if (experiencesResult.success && experiencesResult.data) {
-          const experiences = Array.isArray(experiencesResult.data) 
-            ? experiencesResult.data 
-            : (experiencesResult.data as any).experiences || [];
-          // Handle legacy format - convert duration to startDate/endDate if needed
-          const updatedExperiences = experiences.map((exp: any) => {
-            if (!exp.startDate && exp.duration) {
-              // Parse legacy duration format like "2022 - Present" or "2020 - 2022"
-              const parts = exp.duration.split(' - ');
-              if (parts.length === 2) {
-                const startYear = parts[0].trim();
-                const endPart = parts[1].trim();
+        // Load Skills from localStorage
+        const savedSkills = localStorage.getItem('portfolio_skills');
+        if (savedSkills) {
+          try {
+            const skillsData = JSON.parse(savedSkills);
+            const skills = Array.isArray(skillsData.skills) ? skillsData.skills : [];
+            setSkills(skills);
+            console.log('✅ Skills loaded from localStorage:', skills);
+          } catch (error) {
+            console.error('❌ Error parsing skills from localStorage:', error);
+            // Load from server as fallback
+            const skillsResult = await dataService.getSkillsWithFallback();
+            if (skillsResult.success && skillsResult.data) {
+              const skills = Array.isArray(skillsResult.data) ? skillsResult.data : (skillsResult.data as any).skills || [];
+              setSkills(skills);
+              console.log('✅ Skills loaded from server (fallback)');
+            } else {
+              const defaultData = migrationService.getDefaultData();
+              setSkills(defaultData.skills || []);
+              console.log('✅ Skills loaded from defaults');
+            }
+          }
+        } else {
+          // No localStorage data, load from server
+          const skillsResult = await dataService.getSkillsWithFallback();
+          if (skillsResult.success && skillsResult.data) {
+            const skills = Array.isArray(skillsResult.data) ? skillsResult.data : (skillsResult.data as any).skills || [];
+            setSkills(skills);
+            console.log('✅ Skills loaded from server');
+          } else {
+            const defaultData = migrationService.getDefaultData();
+            setSkills(defaultData.skills || []);
+            console.log('✅ Skills loaded from defaults');
+          }
+        }
+
+        // Load Experiences from localStorage
+        const savedExperiences = localStorage.getItem('portfolio_experiences');
+        if (savedExperiences) {
+          try {
+            const experiencesData = JSON.parse(savedExperiences);
+            const experiences = Array.isArray(experiencesData.experiences) ? experiencesData.experiences : [];
+            // Handle legacy format - convert duration to startDate/endDate if needed
+            const updatedExperiences = experiences.map((exp: any) => {
+              if (!exp.startDate && exp.duration) {
+                const parts = exp.duration.split(' - ');
+                if (parts.length === 2) {
+                  const startYear = parts[0].trim();
+                  const endPart = parts[1].trim();
+                  return {
+                    ...exp,
+                    type: exp.type || 'job',
+                    startDate: `${startYear}-01`,
+                    endDate: endPart === 'Present' ? null : `${endPart}-12`,
+                    location: exp.location || 'Unknown',
+                    duration: exp.duration || `${startYear} - ${endPart}`
+                  };
+                }
+              }
+              return {
+                ...exp,
+                type: exp.type || 'job',
+                startDate: exp.startDate || '2020-01',
+                endDate: exp.endDate || null,
+                location: exp.location || 'Unknown',
+                duration: exp.duration || '2020 - Present'
+              };
+            });
+            setExperiences(updatedExperiences);
+            console.log('✅ Experiences loaded from localStorage');
+          } catch (error) {
+            console.error('❌ Error parsing experiences from localStorage:', error);
+            // Load from server as fallback
+            const experiencesResult = await dataService.getExperiencesWithFallback();
+            if (experiencesResult.success && experiencesResult.data) {
+              const experiences = Array.isArray(experiencesResult.data) ? experiencesResult.data : (experiencesResult.data as any).experiences || [];
+              const updatedExperiences = experiences.map((exp: any) => {
+                if (!exp.startDate && exp.duration) {
+                  const parts = exp.duration.split(' - ');
+                  if (parts.length === 2) {
+                    const startYear = parts[0].trim();
+                    const endPart = parts[1].trim();
+                    return {
+                      ...exp,
+                      type: exp.type || 'job',
+                      startDate: `${startYear}-01`,
+                      endDate: endPart === 'Present' ? null : `${endPart}-12`,
+                      location: exp.location || 'Unknown'
+                    };
+                  }
+                }
                 return {
                   ...exp,
                   type: exp.type || 'job',
-                  startDate: `${startYear}-01`,
-                  endDate: endPart === 'Present' ? null : `${endPart}-12`
+                  startDate: exp.startDate || '2020-01',
+                  endDate: exp.endDate || null,
+                  location: exp.location || 'Unknown'
                 };
-              }
+              });
+              setExperiences(updatedExperiences);
+              console.log('✅ Experiences loaded from server (fallback)');
+            } else {
+              const defaultData = migrationService.getDefaultData();
+              setExperiences(defaultData.experiences || []);
+              console.log('✅ Experiences loaded from defaults');
             }
-            return {
-              ...exp,
-              type: exp.type || 'job'
-            };
-          });
-          setExperiences(updatedExperiences);
+          }
         } else {
-          // Fallback to default data
-          const defaultData = migrationService.getDefaultData();
-          setExperiences(defaultData.experiences || []);
+          // No localStorage data, load from server
+          const experiencesResult = await dataService.getExperiencesWithFallback();
+          if (experiencesResult.success && experiencesResult.data) {
+            const experiences = Array.isArray(experiencesResult.data) ? experiencesResult.data : (experiencesResult.data as any).experiences || [];
+            const updatedExperiences = experiences.map((exp: any) => {
+              if (!exp.startDate && exp.duration) {
+                const parts = exp.duration.split(' - ');
+                if (parts.length === 2) {
+                  const startYear = parts[0].trim();
+                  const endPart = parts[1].trim();
+                  return {
+                    ...exp,
+                    type: exp.type || 'job',
+                    startDate: `${startYear}-01`,
+                    endDate: endPart === 'Present' ? null : `${endPart}-12`,
+                    location: exp.location || 'Unknown',
+                    duration: exp.duration || `${startYear} - ${endPart}`
+                  };
+                }
+              }
+              return {
+                ...exp,
+                type: exp.type || 'job',
+                startDate: exp.startDate || '2020-01',
+                endDate: exp.endDate || null,
+                location: exp.location || 'Unknown',
+                duration: exp.duration || '2020 - Present'
+              };
+            });
+            setExperiences(updatedExperiences);
+            console.log('✅ Experiences loaded from server');
+          } else {
+            const defaultData = migrationService.getDefaultData();
+            setExperiences(defaultData.experiences || []);
+            console.log('✅ Experiences loaded from defaults');
+          }
         }
 
-        // Load skills data
-        const skillsResult = await dataService.getSkillsWithFallback();
-        if (skillsResult.success && skillsResult.data) {
-          const skills = Array.isArray(skillsResult.data) 
-            ? skillsResult.data 
-            : (skillsResult.data as any).skills || [];
-          setSkills(skills);
-        } else {
-          // Fallback to default data
-          const defaultData = migrationService.getDefaultData();
-          setSkills(defaultData.skills || []);
-        }
+        console.log('🎉 All data loaded successfully!');
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('💥 Critical error loading data:', error);
+        // Clear localStorage if there are persistent errors
+        localStorage.removeItem('portfolio_profile');
+        localStorage.removeItem('portfolio_projects');
+        localStorage.removeItem('portfolio_skills');
+        localStorage.removeItem('portfolio_experiences');
+        // Reload with default data
+        window.location.reload();
       }
     };
-
     loadData();
   }, []);
 
-  const updateProjects = async (newProjects: Project[]) => {
-    setProjects(newProjects);
-    // Update both server and localStorage
-    await dataService.updateProjectsWithFallback(newProjects);
+  // Listen for custom events from offline editor
+  useEffect(() => {
+    const handlePortfolioDataUpdate = (e: CustomEvent) => {
+      console.log('🔄 Portfolio data updated from offline editor, reloading...');
+      // Reload data when offline editor saves changes
+      window.location.reload();
+    };
+
+    window.addEventListener('portfolioDataUpdated', handlePortfolioDataUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('portfolioDataUpdated', handlePortfolioDataUpdate as EventListener);
+    };
+  }, []);
+
+  const addProject = async (project: Omit<Project, 'id'>) => {
+    const newProject = { ...project, id: Date.now() };
+    const updatedProjects = [...projects, newProject];
+    setProjects(updatedProjects);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_projects', JSON.stringify({ projects: updatedProjects }));
+    
+    // Update server
+    await dataService.updateProjectsWithFallback(updatedProjects);
   };
 
-  const updateExperiences = async (newExperiences: Experience[]) => {
-    setExperiences(newExperiences);
-    // Update both server and localStorage
-    await dataService.updateExperiencesWithFallback(newExperiences);
-  };
-
-  const updateSkills = async (newSkills: Skill[]) => {
-    setSkills(newSkills);
-    // Update both server and localStorage
-    await dataService.updateSkillsWithFallback(newSkills);
-  };
-
-  const updateProfile = async (newProfile: Partial<Profile>) => {
-    const updatedProfile = { ...profile, ...newProfile };
-    setProfile(updatedProfile);
-    // Update both server and localStorage
-    await dataService.updateProfileWithFallback(updatedProfile);
-  };
-
-  const addProject = async (project: Project) => {
-    const newProjects = [...projects, { ...project, id: Math.max(...projects.map(p => p.id), 0) + 1 }];
-    await updateProjects(newProjects);
-  };
-
-  const updateProject = async (id: number, project: Project) => {
-    const newProjects = projects.map(p => p.id === id ? { ...project, id } : p);
-    await updateProjects(newProjects);
+  const updateProject = async (id: number, project: Partial<Project>) => {
+    const updatedProjects = projects.map(p => p.id === id ? { ...p, ...project } : p);
+    setProjects(updatedProjects);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_projects', JSON.stringify({ projects: updatedProjects }));
+    
+    // Update server
+    await dataService.updateProjectsWithFallback(updatedProjects);
   };
 
   const deleteProject = async (id: number) => {
-    const newProjects = projects.filter(p => p.id !== id);
-    await updateProjects(newProjects);
+    const updatedProjects = projects.filter(p => p.id !== id);
+    setProjects(updatedProjects);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_projects', JSON.stringify({ projects: updatedProjects }));
+    
+    // Update server
+    await dataService.updateProjectsWithFallback(updatedProjects);
   };
 
   const addExperience = async (experience: Omit<Experience, 'id'>) => {
-    const newExperiences = [...experiences, { ...experience, id: Math.max(...experiences.map(e => e.id), 0) + 1 }];
-    await updateExperiences(newExperiences);
+    const newExperience = { ...experience, id: Date.now() };
+    const updatedExperiences = [...experiences, newExperience];
+    setExperiences(updatedExperiences);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+    
+    // Update server
+    await dataService.updateExperiencesWithFallback(updatedExperiences);
   };
 
-  const updateExperience = async (id: number, experience: Omit<Experience, 'id'>) => {
-    const newExperiences = experiences.map(e => e.id === id ? { ...experience, id } : e);
-    await updateExperiences(newExperiences);
+  const updateExperience = async (id: number, experience: Partial<Experience>) => {
+    const updatedExperiences = experiences.map(e => e.id === id ? { ...e, ...experience } : e);
+    setExperiences(updatedExperiences);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+    
+    // Update server
+    await dataService.updateExperiencesWithFallback(updatedExperiences);
   };
 
   const deleteExperience = async (id: number) => {
-    const newExperiences = experiences.filter(e => e.id !== id);
-    await updateExperiences(newExperiences);
+    const updatedExperiences = experiences.filter(e => e.id !== id);
+    setExperiences(updatedExperiences);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: updatedExperiences }));
+    
+    // Update server
+    await dataService.updateExperiencesWithFallback(updatedExperiences);
   };
 
   const addSkill = async (skill: Skill) => {
-    const newSkills = [...skills, skill];
-    await updateSkills(newSkills);
+    const updatedSkills = [...skills, skill];
+    setSkills(updatedSkills);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_skills', JSON.stringify({ skills: updatedSkills }));
+    
+    // Update server
+    await dataService.updateSkillsWithFallback(updatedSkills);
   };
 
-  const updateSkill = async (name: string, skill: Skill) => {
-    const newSkills = skills.map(s => s.name === name ? skill : s);
-    await updateSkills(newSkills);
+  const updateSkill = async (index: number, skill: Partial<Skill>) => {
+    const updatedSkills = skills.map((s, i) => i === index ? { ...s, ...skill } : s);
+    setSkills(updatedSkills);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_skills', JSON.stringify({ skills: updatedSkills }));
+    
+    // Update server
+    await dataService.updateSkillsWithFallback(updatedSkills);
   };
 
-  const deleteSkill = async (name: string) => {
-    const newSkills = skills.filter(s => s.name !== name);
-    await updateSkills(newSkills);
+  const deleteSkill = async (index: number) => {
+    const updatedSkills = skills.filter((_, i) => i !== index);
+    setSkills(updatedSkills);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_skills', JSON.stringify({ skills: updatedSkills }));
+    
+    // Update server
+    await dataService.updateSkillsWithFallback(updatedSkills);
   };
 
-  // Export all data as JSON
+  const updateProfile = async (profileData: Partial<Profile>) => {
+    const updatedProfile = { ...profile, ...profileData };
+    setProfile(updatedProfile);
+    
+    // Update localStorage
+    localStorage.setItem('portfolio_profile', JSON.stringify({ profile: updatedProfile }));
+    
+    // Update server
+    await dataService.updateProfileWithFallback(updatedProfile);
+  };
+
   const exportData = () => {
-    const allData = {
+    const data = {
       profile,
       projects,
-      experiences,
       skills,
-      exportDate: new Date().toISOString(),
-      version: '1.0'
+      experiences
     };
     
-    const dataStr = JSON.stringify(allData, null, 2);
+    const dataStr = JSON.stringify(data, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
     const link = document.createElement('a');
     link.href = url;
-    link.download = `portfolio-data-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = 'portfolio-data.json';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  // Import data from JSON file
-  const importData = (file: File): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target?.result as string);
-          
-          // Validate data structure
-          if (data.profile && data.projects && data.experiences && data.skills) {
-            setProfile(data.profile);
-            setProjects(data.projects);
-            setExperiences(data.experiences);
-            setSkills(data.skills);
-            
-            // Update localStorage
-            localStorage.setItem('portfolio_profile', JSON.stringify(data.profile));
-            localStorage.setItem('portfolio_projects', JSON.stringify(data.projects));
-            localStorage.setItem('portfolio_experiences', JSON.stringify(data.experiences));
-            localStorage.setItem('portfolio_skills', JSON.stringify(data.skills));
-            
-            resolve(true);
-          } else {
-            reject(new Error('Invalid data format'));
-          }
-        } catch (error) {
-          reject(error);
-        }
-      };
-      reader.readAsText(file);
-    });
+  const importData = (data: any) => {
+    if (data.profile) {
+      setProfile(data.profile);
+      localStorage.setItem('portfolio_profile', JSON.stringify({ profile: data.profile }));
+    }
+    if (data.projects) {
+      setProjects(data.projects);
+      localStorage.setItem('portfolio_projects', JSON.stringify({ projects: data.projects }));
+    }
+    if (data.skills) {
+      setSkills(data.skills);
+      localStorage.setItem('portfolio_skills', JSON.stringify({ skills: data.skills }));
+    }
+    if (data.experiences) {
+      setExperiences(data.experiences);
+      localStorage.setItem('portfolio_experiences', JSON.stringify({ experiences: data.experiences }));
+    }
   };
 
-  // Reset to default data
   const resetToDefaults = () => {
+    const defaultData = migrationService.getDefaultData();
+    setProfile(defaultData.profile);
+    setProjects(defaultData.projects || []);
+    setSkills(defaultData.skills || []);
+    setExperiences(defaultData.experiences || []);
+    
+    // Clear localStorage
     localStorage.removeItem('portfolio_profile');
     localStorage.removeItem('portfolio_projects');
-    localStorage.removeItem('portfolio_experiences');
     localStorage.removeItem('portfolio_skills');
-    window.location.reload();
+    localStorage.removeItem('portfolio_experiences');
   };
 
-  const value = {
-    projects,
-    experiences,
-    skills,
+  const value: DataContextType = {
     profile,
-    updateProjects,
-    updateExperiences,
-    updateSkills,
-    updateProfile,
+    projects,
+    skills,
+    experiences,
     addProject,
     updateProject,
     deleteProject,
@@ -330,6 +504,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     addSkill,
     updateSkill,
     deleteSkill,
+    updateProfile,
     exportData,
     importData,
     resetToDefaults
